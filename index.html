@@ -176,6 +176,14 @@
 
 <script>
 const RAW_URL = 'https://raw.githubusercontent.com/DotochkaPi/game-draft-feed/main/data.json';
+async function fetchData() {
+  // GitHub API - без кэша
+  const r = await fetch('https://api.github.com/repos/DotochkaPi/game-draft-feed/contents/data.json', {
+    headers: { 'Authorization': 'Bearer ' + GITHUB_TOKEN, 'Cache-Control': 'no-cache' }
+  });
+  const d = await r.json();
+  return JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))));
+}
 
 function timeAgo(iso) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -219,9 +227,7 @@ async function loadFeed() {
   feed.innerHTML = '<div class="spinner"><div class="spin"></div></div>';
   label.textContent = 'Загрузка...';
   try {
-    const resp = await fetch(RAW_URL + '?t=' + Date.now());
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const data = await resp.json();
+    const data = await fetchData();
     const drafts = (data.drafts || []).slice().sort((a, b) => {
       if ((b.likes || 0) !== (a.likes || 0)) return (b.likes || 0) - (a.likes || 0);
       return new Date(b.createdAt) - new Date(a.createdAt);
