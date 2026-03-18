@@ -3,185 +3,226 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GDD — Game Draft Feed</title>
+<title>Драфт — Game Draft Feed</title>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:#0a0a0f;color:#e2e8f0;font-family:system-ui,-apple-system,sans-serif;min-height:100vh;padding-bottom:40px}
-.header{background:#12121a;border-bottom:1px solid #2a2a3a;padding:16px 20px;display:flex;align-items:center;gap:12px}
-.header a{color:#64748b;text-decoration:none;font-size:14px}
-.header a:hover{color:#e2e8f0}
-.header h1{font-size:18px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.container{max-width:600px;margin:0 auto;padding:24px 16px}
-.meta{display:flex;align-items:center;gap:12px;margin-bottom:20px;font-size:14px;color:#64748b}
-.author{font-weight:600;color:#94a3b8}
-.genre-tag{background:#1e293b;border:1px solid #2a2a3a;border-radius:20px;padding:4px 10px;font-size:12px}
-.card{background:#12121a;border:1px solid #2a2a3a;border-radius:12px;padding:20px;margin-bottom:16px}
-.gdd-section{font-size:15px;font-weight:700;color:#21c55d;margin:16px 0 6px}
-.gdd-section:first-child{margin-top:0}
-.gdd-bullet{margin-left:12px;margin-bottom:4px;color:#cbd5e1}
-.gdd-bullet::before{content:"• ";color:#64748b}
-.gdd-text{color:#94a3b8;line-height:1.6;margin-bottom:4px}
-.actions{display:flex;gap:10px;margin-bottom:16px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 16px;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s,transform .1s;flex:1}
-.btn:active{transform:scale(.97)}
-.btn-like{background:#1e293b;color:#e2e8f0;border:1px solid #2a2a3a}
-.btn-like.liked{background:#4c0519;color:#fb7185;border-color:#9f1239}
-.btn-share{background:#1e293b;color:#e2e8f0;border:1px solid #2a2a3a}
-.btn-create{background:#21c55d;color:#0a0a0f;border:none;margin-top:4px}
-.spinner-wrap{display:flex;align-items:center;justify-content:center;padding:60px;gap:12px;color:#64748b}
-.spinner{width:24px;height:24px;border:2px solid #2a2a3a;border-top-color:#21c55d;border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.error{text-align:center;padding:60px 20px;color:#64748b}
-.error h2{font-size:18px;margin-bottom:8px;color:#94a3b8}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;color:#e2e8f0;padding:12px 20px;border-radius:8px;font-size:14px;border:1px solid #2a2a3a;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
-.toast.show{opacity:1}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0a0a0f; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; }
+.container { max-width: 600px; margin: 0 auto; padding: 16px; }
+nav { display: flex; align-items: center; gap: 16px; padding: 16px 0 24px; border-bottom: 1px solid #2a2a3a; margin-bottom: 24px; flex-wrap: wrap; }
+.nav-back { color: #64748b; text-decoration: none; font-size: 0.9rem; }
+.nav-back:hover { color: #e2e8f0; }
+.nav-spacer { flex: 1; }
+.btn { background: #21c55d; color: #0a0a0f; border: none; border-radius: 8px; padding: 9px 16px; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: opacity 0.2s; }
+.btn:hover { opacity: 0.85; }
+.btn-ghost { background: transparent; color: #21c55d; border: 1px solid #21c55d; }
+.btn-like { background: transparent; color: #e2e8f0; border: 1px solid #2a2a3a; border-radius: 8px; padding: 9px 16px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+.btn-like.liked { color: #ff6b6b; border-color: #ff6b6b; background: #ff6b6b11; }
+.btn-like:hover:not(.liked) { border-color: #ff6b6b; color: #ff6b6b; }
+.spinner { display: flex; justify-content: center; padding: 60px 0; }
+.spinner::after { content: ''; width: 36px; height: 36px; border: 3px solid #2a2a3a; border-top-color: #21c55d; border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.error { text-align: center; padding: 60px 0; color: #64748b; }
+.error p { margin-bottom: 20px; font-size: 1.1rem; }
+.draft-header { margin-bottom: 28px; }
+.draft-title { font-size: 1.6rem; font-weight: 700; line-height: 1.3; margin-bottom: 14px; }
+.draft-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; color: #64748b; font-size: 0.85rem; margin-bottom: 10px; }
+.genre-tag { background: #21c55d22; color: #21c55d; border: 1px solid #21c55d44; border-radius: 6px; padding: 3px 10px; font-size: 0.75rem; font-weight: 600; }
+.draft-content { background: #12121a; border: 1px solid #2a2a3a; border-radius: 12px; padding: 24px; margin-bottom: 28px; line-height: 1.7; }
+.section-header { color: #21c55d; font-weight: 700; font-size: 1rem; margin: 20px 0 8px; display: block; }
+.section-header:first-child { margin-top: 0; }
+.bullet { color: #e2e8f0; padding-left: 20px; position: relative; margin: 4px 0; display: block; }
+.bullet::before { content: ''; position: absolute; left: 8px; top: 0.65em; width: 4px; height: 4px; background: #21c55d; border-radius: 50%; }
+.body-text { color: #94a3b8; display: block; margin: 6px 0; }
+.actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding-top: 8px; border-top: 1px solid #2a2a3a; }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #21c55d; color: #0a0a0f; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
+.toast.show { opacity: 1; }
 </style>
 </head>
 <body>
-<div class="header">
-  <a href="index.html">← Лента</a>
-  <h1 id="page-title">GDD</h1>
+<div class="container">
+  <nav>
+    <a href="index.html" class="nav-back">← Лента</a>
+    <div class="nav-spacer"></div>
+    <a href="create.html" class="btn">✨ Создать похожий</a>
+  </nav>
+
+  <div id="content">
+    <div class="spinner"></div>
+  </div>
 </div>
-<div class="container" id="content">
-  <div class="spinner-wrap"><div class="spinner"></div> Загружаю...</div>
-</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-const RAW_URL = 'https://raw.githubusercontent.com/DotochkaPi/game-draft-feed/main/data.json';
-async function fetchData() {
-  // Добавляем timestamp чтобы обойти кэш
-  const url = RAW_URL + '?t=' + Date.now() + '&r=' + Math.random().toString(36).slice(2);
-  const r = await fetch(url, { cache: 'no-store' });
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  return await r.json();
+const SUPABASE_URL = 'https://vfyqrsxcenksspvklhak.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmeXFyc3hjZW5rc3NwdmtsaGFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzIwMTQsImV4cCI6MjA4OTQ0ODAxNH0.4oTHiuHexv3rwcj_blkDTcALBXzadug38mtWga7yi-4';
+const HEADERS = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation'
+};
+
+function getFingerprint() {
+  const fp = navigator.userAgent + screen.width + screen.height + Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return btoa(encodeURIComponent(fp)).substring(0, 20);
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatDate(dateStr) {
+  return new Date(dateStr).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function renderContent(text) {
+  if (!text) return '';
+  const lines = text.split('\n');
+  let html = '';
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) { html += '<br>'; continue; }
+    // Detect emoji at start (section header)
+    const emojiRe = /^[\u{1F000}-\u{1FFFF}\u{2600}-\u{27FF}\u{2300}-\u{23FF}⚡🎮🗺️🎯🏆💡🌍🔧⚙️🎲🏅🌟✨🎪🎨🎭🎬🎤🎧🎵🎶🎸🎹🎺🎻🥁📖📝📜📚🗒️📋📌📍🔑🗝️💎🏰🗡️🛡️🚀🌙⭐🌈🔮🎁🎊🎉🎀🎗️]/u;
+    if (emojiRe.test(trimmed)) {
+      html += `<span class="section-header">${escapeHtml(trimmed)}</span>`;
+    } else if (trimmed.startsWith('•') || trimmed.startsWith('-') || trimmed.startsWith('*')) {
+      const lineText = trimmed.replace(/^[•\-\*]\s*/, '');
+      html += `<span class="bullet">${escapeHtml(lineText)}</span>`;
+    } else {
+      html += `<span class="body-text">${escapeHtml(trimmed)}</span>`;
+    }
+  }
+  return html;
 }
 
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-function getFingerprint() {
-  const fp = navigator.userAgent + screen.width + screen.height + Intl.DateTimeFormat().resolvedOptions().timeZone;
-  return btoa(encodeURIComponent(fp)).substring(0, 16);
-}
-
-function formatDate(iso) {
-  try {
-    return new Date(iso).toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'});
-  } catch { return iso; }
-}
-
-function renderGDD(text, container) {
-  container.innerHTML = '';
-  (text || '').split('\n').forEach(line => {
-    if (!line.trim()) return;
-    const el = document.createElement('div');
-    if (/^[🎯🎮👥📱💰🔧⚡]/.test(line.trim())) {
-      el.className = 'gdd-section';
-      el.textContent = line.trim();
-    } else if (/^[•\-]/.test(line.trim())) {
-      el.className = 'gdd-bullet';
-      el.textContent = line.replace(/^[•\-]\s*/,'').trim();
-    } else {
-      el.className = 'gdd-text';
-      el.textContent = line.trim();
-    }
-    container.appendChild(el);
-  });
-}
+let currentDraft = null;
+const fp = getFingerprint();
 
 async function loadDraft() {
-  const id = new URLSearchParams(window.location.search).get('id');
-  const container = document.getElementById('content');
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+  const content = document.getElementById('content');
 
   if (!id) {
-    container.innerHTML = '<div class="error"><h2>Драфт не найден</h2><p>Неверная ссылка</p></div>';
+    content.innerHTML = '<div class="error"><p>ID не указан</p><a href="index.html" class="btn">← На главную</a></div>';
     return;
   }
 
   try {
-    const data = await fetchData();
-    const drafts = data.drafts || [];
-    const draft = drafts.find(d => d.id === id);
+    const resp = await fetch(SUPABASE_URL + '/rest/v1/drafts?id=eq.' + encodeURIComponent(id) + '&select=*', { headers: HEADERS });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const drafts = await resp.json();
+    if (!drafts.length) {
+      content.innerHTML = '<div class="error"><p>Драфт не найден 🤔</p><a href="index.html" class="btn">← Лента</a></div>';
+      return;
+    }
+    currentDraft = drafts[0];
+    renderDraft();
+  } catch (e) {
+    content.innerHTML = '<div class="error"><p>Ошибка загрузки 😢</p><button class="btn" onclick="loadDraft()">Повторить</button></div>';
+    console.error(e);
+  }
+}
 
-    if (!draft) {
-      container.innerHTML = '<div class="error"><h2>Драфт не найден</h2><p>Возможно он был удалён или ссылка устарела</p></div>';
+function isLiked() {
+  const key = 'liked_' + currentDraft.id;
+  return localStorage.getItem(key) === '1';
+}
+
+function renderDraft() {
+  const d = currentDraft;
+  const liked = isLiked();
+  const likedBy = Array.isArray(d.liked_by) ? d.liked_by : [];
+  const likedByFp = likedBy.includes(fp);
+  const likedState = liked || likedByFp;
+
+  document.title = escapeHtml(d.title) + ' — Game Draft Feed';
+
+  document.getElementById('content').innerHTML = `
+    <div class="draft-header">
+      <div class="draft-title">${escapeHtml(d.title)}</div>
+      <div class="draft-meta">
+        <span class="genre-tag">${escapeHtml(d.genre || 'Без жанра')}</span>
+        <span>👤 ${escapeHtml(d.author || 'Аноним')}</span>
+        <span>📅 ${formatDate(d.created_at)}</span>
+      </div>
+    </div>
+    <div class="draft-content">${renderContent(d.content)}</div>
+    <div class="actions">
+      <button class="btn-like ${likedState ? 'liked' : ''}" id="likeBtn" onclick="handleLike()">
+        ❤️ <span id="likeCount">${d.likes || 0}</span>
+      </button>
+      <button class="btn btn-ghost" onclick="handleShare()">🔗 Поделиться</button>
+    </div>
+  `;
+}
+
+async function handleLike() {
+  if (isLiked()) { showToast('Вы уже лайкнули!'); return; }
+
+  const btn = document.getElementById('likeBtn');
+  btn.disabled = true;
+
+  try {
+    // Fetch fresh data
+    const resp = await fetch(SUPABASE_URL + '/rest/v1/drafts?id=eq.' + encodeURIComponent(currentDraft.id) + '&select=*', { headers: HEADERS });
+    const drafts = await resp.json();
+    const fresh = drafts[0];
+
+    const likedBy = Array.isArray(fresh.liked_by) ? fresh.liked_by : [];
+    if (likedBy.includes(fp)) {
+      localStorage.setItem('liked_' + currentDraft.id, '1');
+      showToast('Вы уже лайкнули!');
+      btn.disabled = false;
       return;
     }
 
-    document.getElementById('page-title').textContent = draft.title || 'GDD';
-    document.title = (draft.title || 'GDD') + ' — Game Draft Feed';
+    const newLikedBy = [...likedBy, fp];
+    const newLikes = (fresh.likes || 0) + 1;
 
-    const fp = getFingerprint();
-    const isLiked = (draft.likedBy || []).includes(fp);
+    const patchResp = await fetch(SUPABASE_URL + '/rest/v1/drafts?id=eq.' + encodeURIComponent(currentDraft.id), {
+      method: 'PATCH',
+      headers: HEADERS,
+      body: JSON.stringify({ likes: newLikes, liked_by: newLikedBy })
+    });
 
-    container.innerHTML = `
-      <div class="meta">
-        <span class="author">👤 ${draft.author || 'Аноним'}</span>
-        <span class="genre-tag">${draft.genre || 'Другое'}</span>
-        <span>${formatDate(draft.createdAt)}</span>
-      </div>
-      <div class="actions">
-        <button class="btn btn-like ${isLiked ? 'liked' : ''}" id="btn-like">
-          ❤️ ${draft.likes || 0}
-        </button>
-        <button class="btn btn-share" id="btn-share">🔗 Поделиться</button>
-      </div>
-      <div class="card" id="gdd-container"></div>
-      <a href="create.html" class="btn btn-create" style="display:flex;text-decoration:none;margin-top:8px">✨ Создать похожий</a>
-    `;
+    if (!patchResp.ok) throw new Error('Patch failed');
 
-    renderGDD(draft.content, document.getElementById('gdd-container'));
+    localStorage.setItem('liked_' + currentDraft.id, '1');
+    currentDraft.likes = newLikes;
+    currentDraft.liked_by = newLikedBy;
 
-    // Like
-    document.getElementById('btn-like').onclick = async () => {
-      const btn = document.getElementById('btn-like');
-      btn.disabled = true;
+    document.getElementById('likeCount').textContent = newLikes;
+    btn.classList.add('liked');
+    showToast('❤️ Спасибо за лайк!');
+  } catch (e) {
+    showToast('Ошибка, попробуйте снова');
+    console.error(e);
+  }
+  btn.disabled = false;
+}
 
-      if (isLiked) { showToast('Вы уже поставили лайк'); btn.disabled = false; return; }
-
-      try {
-        const d2 = await fetchData();
-        const drafts2 = d2.drafts || [];
-        const idx = drafts2.findIndex(x => x.id === id);
-        if (idx < 0) throw new Error('Не найден');
-
-        drafts2[idx].likes = (drafts2[idx].likes || 0) + 1;
-        drafts2[idx].likedBy = [...(drafts2[idx].likedBy || []), fp];
-
-        const shaResp = await fetch('https://api.github.com/repos/' + REPO + '/contents/data.json', {
-          headers: { 'Authorization': 'Bearer ' + GITHUB_TOKEN }
-        });
-        const shaData = await shaResp.json();
-
-        const newContent = JSON.stringify({ drafts: drafts2 }, null, 2);
-        const putResp = await fetch('https://api.github.com/repos/' + REPO + '/contents/data.json', {
-          method: 'PUT',
-          headers: { 'Authorization': 'Bearer ' + GITHUB_TOKEN, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: 'like: ' + id.substring(0,8), content: btoa(unescape(encodeURIComponent(newContent))), sha: shaData.sha })
-        });
-
-        if (!putResp.ok) throw new Error('Ошибка сохранения');
-        btn.className = 'btn btn-like liked';
-        btn.innerHTML = '❤️ ' + drafts2[idx].likes;
-        showToast('Лайк поставлен!');
-      } catch(e) {
-        showToast('Ошибка: ' + e.message);
-        btn.disabled = false;
-      }
-    };
-
-    // Share
-    document.getElementById('btn-share').onclick = () => {
-      navigator.clipboard.writeText(window.location.href).then(() => showToast('Ссылка скопирована!'));
-    };
-
-  } catch(e) {
-    container.innerHTML = '<div class="error"><h2>Ошибка загрузки</h2><p>' + e.message + '</p></div>';
+function handleShare() {
+  const url = location.href;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => showToast('🔗 Ссылка скопирована!'));
+  } else {
+    const el = document.createElement('input');
+    el.value = url;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    showToast('🔗 Ссылка скопирована!');
   }
 }
 
