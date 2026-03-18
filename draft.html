@@ -49,6 +49,14 @@ body{background:#0a0a0f;color:#e2e8f0;font-family:system-ui,-apple-system,sans-s
 
 <script>
 const RAW_URL = 'https://raw.githubusercontent.com/DotochkaPi/game-draft-feed/main/data.json';
+async function fetchData() {
+  // GitHub API - без кэша
+  const r = await fetch('https://api.github.com/repos/DotochkaPi/game-draft-feed/contents/data.json', {
+    headers: { 'Authorization': 'Bearer ' + GITHUB_TOKEN, 'Cache-Control': 'no-cache' }
+  });
+  const d = await r.json();
+  return JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))));
+}
 const GITHUB_TOKEN = ['ghp_2M70F0WOQ', 'p9FF3kCKuICtW4eqVEHeQ4Ui2HW'].join('');
 const REPO = 'DotochkaPi/game-draft-feed';
 
@@ -99,9 +107,7 @@ async function loadDraft() {
   }
 
   try {
-    const resp = await fetch(RAW_URL + '?t=' + Date.now());
-    if (!resp.ok) throw new Error('Не удалось загрузить данные');
-    const data = await resp.json();
+    const data = await fetchData();
     const drafts = data.drafts || [];
     const draft = drafts.find(d => d.id === id);
 
@@ -142,8 +148,7 @@ async function loadDraft() {
       if (isLiked) { showToast('Вы уже поставили лайк'); btn.disabled = false; return; }
 
       try {
-        const r2 = await fetch(RAW_URL + '?t=' + Date.now());
-        const d2 = await r2.json();
+        const d2 = await fetchData();
         const drafts2 = d2.drafts || [];
         const idx = drafts2.findIndex(x => x.id === id);
         if (idx < 0) throw new Error('Не найден');
