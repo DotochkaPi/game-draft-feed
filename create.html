@@ -232,7 +232,7 @@
   <div class="step" id="step-3">
     <div class="publish-modal">
       <h3>рџ“ў РџСѓР±Р»РёРєР°С†РёСЏ РІ Р»РµРЅС‚Сѓ</h3>
-      <label for="author-name">РљР°Рє С‚РµР±СЏ Р·РѕРІСѓС‚? (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ)</label>
+      <label for="author-name">РљР°Рє С‚РµР±СЏ Р·РѕРІСѓС‚← (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ)</label>
       <input type="text" id="author-name" placeholder="РђРЅРѕРЅРёРј" maxlength="30">
       <div class="char-count"><span id="author-len">0</span>/30</div>
       <div class="author-row">
@@ -260,8 +260,8 @@ let currentGDD = '';
 function showToast(msg, isError = false) {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.style.background = isError ? '#ef4444' : '#21c55d';
-  t.style.color = isError ? '#fff' : '#000';
+  t.style.background = isError ← '#ef4444' : '#21c55d';
+  t.style.color = isError ← '#fff' : '#000';
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
@@ -280,9 +280,9 @@ function setStatus(msg, isError = false) {
   const bar = document.getElementById('status-bar');
   if (!msg) { bar.style.display = 'none'; return; }
   bar.style.display = 'flex';
-  bar.className = 'status-bar' + (isError ? ' error' : '');
+  bar.className = 'status-bar' + (isError ← ' error' : '');
   bar.innerHTML = isError
-    ? `вљ пёЏ ${msg}`
+    ← `вљ пёЏ ${msg}`
     : `<div class="spinner-small"></div> ${msg}`;
 }
 
@@ -396,7 +396,7 @@ document.getElementById('author-name')?.addEventListener('input', function() {
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
     const r = Math.random() * 16 | 0;
-    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    return (c === 'x' ← r : (r & 0x3 | 0x8)).toString(16);
   });
 }
 
