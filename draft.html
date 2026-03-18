@@ -49,6 +49,8 @@ body{background:#0a0a0f;color:#e2e8f0;font-family:system-ui,-apple-system,sans-s
 
 <script>
 const RAW_URL = 'https://raw.githubusercontent.com/DotochkaPi/game-draft-feed/main/data.json';
+const GITHUB_TOKEN = ['ghp_2M70F0WOQ','p9FF3kCKuICtW4eqVEHeQ4Ui2HW'].join('');
+const REPO = 'DotochkaPi/game-draft-feed';
 async function fetchData() {
   // GitHub API - без кэша
   const r = await fetch('https://api.github.com/repos/DotochkaPi/game-draft-feed/contents/data.json', {
@@ -57,8 +59,6 @@ async function fetchData() {
   const d = await r.json();
   return JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))));
 }
-const GITHUB_TOKEN = ['ghp_2M70F0WOQ', 'p9FF3kCKuICtW4eqVEHeQ4Ui2HW'].join('');
-const REPO = 'DotochkaPi/game-draft-feed';
 
 function showToast(msg) {
   const t = document.getElementById('toast');
