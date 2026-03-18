@@ -176,15 +176,12 @@
 
 <script>
 const RAW_URL = 'https://raw.githubusercontent.com/DotochkaPi/game-draft-feed/main/data.json';
-const GITHUB_TOKEN = ['ghp_2M70F0WOQ','p9FF3kCKuICtW4eqVEHeQ4Ui2HW'].join('');
-const REPO = 'DotochkaPi/game-draft-feed';
 async function fetchData() {
-  // GitHub API - без кэша
-  const r = await fetch('https://api.github.com/repos/DotochkaPi/game-draft-feed/contents/data.json', {
-    headers: { 'Authorization': 'Bearer ' + GITHUB_TOKEN, 'Cache-Control': 'no-cache' }
-  });
-  const d = await r.json();
-  return JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))));
+  // Добавляем timestamp чтобы обойти кэш
+  const url = RAW_URL + '?t=' + Date.now() + '&r=' + Math.random().toString(36).slice(2);
+  const r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return await r.json();
 }
 
 function timeAgo(iso) {
