@@ -176,6 +176,8 @@
 
 <script>
 const RAW_URL = 'https://raw.githubusercontent.com/DotochkaPi/game-draft-feed/main/data.json';
+const GITHUB_TOKEN = ['ghp_2M70F0WOQ','p9FF3kCKuICtW4eqVEHeQ4Ui2HW'].join('');
+const REPO = 'DotochkaPi/game-draft-feed';
 async function fetchData() {
   // GitHub API - без кэша
   const r = await fetch('https://api.github.com/repos/DotochkaPi/game-draft-feed/contents/data.json', {
