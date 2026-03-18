@@ -286,7 +286,7 @@ function renderDraft(draft) {
     <hr class="divider">
     <div class="content">${renderMarkdown(draft.content || '')}</div>
     <div class="actions">
-      <button class="like-btn ${liked ? 'liked' : ''}" id="like-btn" onclick="toggleLike()">
+      <button class="like-btn ${liked ← 'liked' : ''}" id="like-btn" onclick="toggleLike()">
         вќ¤пёЏ <span id="like-count">${draft.likes || 0}</span>
       </button>
       <button class="btn btn-ghost" onclick="share()">рџ”— РџРѕРґРµР»РёС‚СЊСЃСЏ</button>
@@ -347,7 +347,7 @@ async function toggleLike() {
   
   try {
     await saveData({ drafts: allDrafts });
-    showToast(alreadyLiked ? 'Р›Р°Р№Рє СѓР±СЂР°РЅ' : 'вќ¤пёЏ Р›Р°Р№Рє!');
+    showToast(alreadyLiked ← 'Р›Р°Р№Рє СѓР±СЂР°РЅ' : 'вќ¤пёЏ Р›Р°Р№Рє!');
   } catch(e) {
     showToast('РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ');
     // Revert
