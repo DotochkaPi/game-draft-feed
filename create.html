@@ -5,366 +5,391 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Создать GDD — Game Draft Feed</title>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:#0a0a0f;color:#e2e8f0;font-family:system-ui,-apple-system,sans-serif;min-height:100vh;padding-bottom:40px}
-.header{background:#12121a;border-bottom:1px solid #2a2a3a;padding:16px 20px;display:flex;align-items:center;gap:12px}
-.header a{color:#64748b;text-decoration:none;font-size:14px}
-.header a:hover{color:#e2e8f0}
-.header h1{font-size:18px;font-weight:700;flex:1}
-.container{max-width:600px;margin:0 auto;padding:24px 16px}
-
-/* Steps */
-.steps{display:flex;align-items:center;gap:8px;margin-bottom:28px}
-.step-dot{width:10px;height:10px;border-radius:50%;background:#2a2a3a;transition:background .3s}
-.step-dot.active{background:#21c55d}
-.step-dot.done{background:#166534}
-.step-line{flex:1;height:2px;background:#2a2a3a;transition:background .3s}
-.step-line.done{background:#166534}
-
-/* Cards */
-.card{background:#12121a;border:1px solid #2a2a3a;border-radius:12px;padding:20px;margin-bottom:16px}
-.card-label{font-size:12px;color:#64748b;font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px}
-
-/* Inputs */
-textarea,input[type=text]{width:100%;background:#0a0a0f;color:#e2e8f0;border:1px solid #2a2a3a;border-radius:8px;padding:14px;font-size:15px;font-family:inherit;outline:none;resize:vertical;transition:border-color .2s}
-textarea:focus,input[type=text]:focus{border-color:#21c55d}
-textarea{min-height:120px}
-
-/* GDD output */
-.gdd-output{font-size:14px;line-height:1.7;color:#e2e8f0}
-.gdd-output .section{font-size:15px;font-weight:700;color:#21c55d;margin:14px 0 4px}
-.gdd-output .bullet::before{content:"• ";color:#64748b}
-.gdd-output .bullet{margin-left:8px;color:#cbd5e1}
-.gdd-output .body-text{color:#94a3b8}
-
-/* Buttons */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:13px 20px;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s,transform .1s;width:100%;margin-top:10px}
-.btn:active{transform:scale(.98)}
-.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.btn-primary{background:#21c55d;color:#0a0a0f}
-.btn-secondary{background:#1e293b;color:#e2e8f0;border:1px solid #2a2a3a}
-.btn-ghost{background:transparent;color:#64748b;border:1px solid #2a2a3a}
-.btn-row{display:flex;gap:10px}
-.btn-row .btn{margin-top:0}
-
-/* Spinner */
-.spinner{width:20px;height:20px;border:2px solid #2a2a3a;border-top-color:#21c55d;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* Toast */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;color:#e2e8f0;padding:12px 20px;border-radius:8px;font-size:14px;border:1px solid #2a2a3a;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
-.toast.show{opacity:1}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0a0a0f; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; }
+.container { max-width: 600px; margin: 0 auto; padding: 16px; }
+nav { display: flex; align-items: center; gap: 16px; padding: 16px 0 24px; border-bottom: 1px solid #2a2a3a; margin-bottom: 24px; }
+.nav-back { color: #64748b; text-decoration: none; font-size: 0.9rem; }
+.nav-back:hover { color: #e2e8f0; }
+h1 { font-size: 1.3rem; font-weight: 700; }
+.btn { background: #21c55d; color: #0a0a0f; border: none; border-radius: 8px; padding: 12px 20px; font-size: 0.95rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: opacity 0.2s; width: 100%; justify-content: center; }
+.btn:hover:not(:disabled) { opacity: 0.85; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-ghost { background: transparent; color: #21c55d; border: 1px solid #21c55d; }
+.btn-secondary { background: #1e293b; color: #e2e8f0; border: 1px solid #2a2a3a; }
+textarea { width: 100%; background: #12121a; border: 1px solid #2a2a3a; border-radius: 8px; color: #e2e8f0; font-family: inherit; font-size: 0.95rem; padding: 14px; resize: vertical; min-height: 120px; outline: none; transition: border-color 0.2s; }
+textarea:focus { border-color: #21c55d; }
+input[type="text"] { width: 100%; background: #12121a; border: 1px solid #2a2a3a; border-radius: 8px; color: #e2e8f0; font-family: inherit; font-size: 0.95rem; padding: 12px 14px; outline: none; transition: border-color 0.2s; }
+input[type="text"]:focus { border-color: #21c55d; }
+label { display: block; color: #64748b; font-size: 0.85rem; margin-bottom: 8px; }
+.field { margin-bottom: 16px; }
+.progress { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 28px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: #2a2a3a; transition: background 0.3s; }
+.dot.active { background: #21c55d; }
+.dot.done { background: #21c55d88; }
+.line { width: 32px; height: 2px; background: #2a2a3a; transition: background 0.3s; }
+.line.done { background: #21c55d44; }
+.step { display: none; }
+.step.active { display: block; }
+.step-title { font-size: 1rem; font-weight: 600; margin-bottom: 16px; color: #94a3b8; }
+.draft-preview { background: #12121a; border: 1px solid #2a2a3a; border-radius: 12px; padding: 20px; margin-bottom: 16px; line-height: 1.7; max-height: 420px; overflow-y: auto; }
+.section-header { color: #21c55d; font-weight: 700; font-size: 1rem; margin: 16px 0 6px; display: block; }
+.section-header:first-child { margin-top: 0; }
+.bullet { color: #e2e8f0; padding-left: 20px; position: relative; margin: 4px 0; display: block; }
+.bullet::before { content: ''; position: absolute; left: 8px; top: 0.65em; width: 4px; height: 4px; background: #21c55d; border-radius: 50%; }
+.body-text { color: #94a3b8; display: block; margin: 5px 0; }
+.spinner-inline { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.3); border-top-color: #0a0a0f; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.key-hint { background: #12121a; border: 1px solid #2a2a3a; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 0.8rem; color: #64748b; }
+.key-hint a { color: #21c55d; text-decoration: none; }
+.error-box { background: #ff6b6b11; border: 1px solid #ff6b6b44; border-radius: 8px; padding: 12px; color: #ff6b6b; font-size: 0.85rem; margin-bottom: 16px; display: none; }
+.draft-actions { display: flex; flex-direction: column; gap: 10px; }
+.genre-row { display: flex; gap: 10px; align-items: flex-start; }
+.genre-row input { flex: 1; }
 </style>
 </head>
 <body>
-<div class="header">
-  <a href="index.html">← Лента</a>
-  <h1>✨ Создать GDD</h1>
-</div>
-
 <div class="container">
-  <div class="steps">
-    <div class="step-dot active" id="dot1"></div>
-    <div class="step-line" id="line1"></div>
-    <div class="step-dot" id="dot2"></div>
-    <div class="step-line" id="line2"></div>
-    <div class="step-dot" id="dot3"></div>
+  <nav>
+    <a href="index.html" class="nav-back">← Лента</a>
+    <h1>✨ Создать GDD</h1>
+  </nav>
+
+  <div class="progress" id="progress">
+    <div class="dot active" id="dot1"></div>
+    <div class="line" id="line1"></div>
+    <div class="dot" id="dot2"></div>
+    <div class="line" id="line2"></div>
+    <div class="dot" id="dot3"></div>
   </div>
 
-  <!-- Шаг 1: Идея -->
-  <div id="step1">
-    <div class="card">
-      <div class="card-label">Шаг 1 — Идея игры</div>
-      <textarea id="idea-input" placeholder="Например: roguelike про кота-мага, который спасает деревню от роботов в стимпанк мире"></textarea>
+  <!-- Step 1: Enter idea -->
+  <div class="step active" id="step1">
+    <div class="step-title">Шаг 1 — Ваша идея</div>
+
+    <div class="key-hint" id="keyHint">
+      🔑 Groq API ключ не найден. <a href="https://console.groq.com/keys" target="_blank">Получить ключ</a><br>
+      Вставьте ключ: <input type="text" id="keyInput" placeholder="gsk_..." style="margin-top:8px; font-size:0.8rem; padding:8px 10px;" oninput="saveKey(this.value)">
     </div>
-    <button class="btn btn-primary" id="btn-generate" onclick="generateGDD()">✨ Сгенерировать драфт</button>
+
+    <div class="field">
+      <label>Опишите идею игры</label>
+      <textarea id="ideaInput" placeholder="Например: тактическая RPG в постапокалиптическом мире, где игрок управляет группой выживших..." rows="5"></textarea>
+    </div>
+
+    <div class="error-box" id="error1"></div>
+
+    <button class="btn" id="generateBtn" onclick="handleGenerate()">✨ Сгенерировать драфт</button>
   </div>
 
-  <!-- Шаг 2: GDD -->
-  <div id="step2" style="display:none">
-    <div class="card">
-      <div class="card-label">Шаг 2 — GDD Драфт</div>
-      <div class="gdd-output" id="gdd-output"></div>
-      <div id="edit-area" style="display:none;margin-top:14px">
-        <textarea id="gdd-edit" style="min-height:300px"></textarea>
-        <div style="font-size:13px;color:#64748b;margin:8px 0">Комментарий к правкам (необязательно)</div>
-        <input type="text" id="edit-comment" placeholder="Сделай механику сложнее, добавь кооп...">
-      </div>
+  <!-- Step 2: Review draft -->
+  <div class="step" id="step2">
+    <div class="step-title">Шаг 2 — Ваш GDD</div>
+
+    <div id="draftPreview" class="draft-preview"></div>
+
+    <div class="draft-actions" id="draftActions">
+      <button class="btn" onclick="goToStep3()">📤 Опубликовать</button>
+      <button class="btn btn-ghost" onclick="showEditMode()">✏️ Редактировать</button>
     </div>
-    <div id="view-btns">
-      <div class="btn-row">
-        <button class="btn btn-secondary" onclick="toggleEdit()">✏️ Редактировать</button>
-        <button class="btn btn-primary" onclick="startPublish()">📤 Опубликовать</button>
+
+    <div id="editMode" style="display:none;">
+      <div class="field">
+        <label>Редактировать текст GDD</label>
+        <textarea id="editTextarea" rows="12" style="min-height:200px;"></textarea>
       </div>
-      <button class="btn btn-ghost" style="margin-top:10px" onclick="downloadGDD()">💾 Скачать документ</button>
-    </div>
-    <div id="edit-btns" style="display:none">
-      <div class="btn-row">
-        <button class="btn btn-secondary" onclick="cancelEdit()">✕ Отмена</button>
-        <button class="btn btn-primary" onclick="regenGDD()">🔄 Перегенерировать</button>
+      <div class="field">
+        <label>Комментарий для регенерации (опционально)</label>
+        <textarea id="regenComment" placeholder="Что улучшить? Например: сделай больше упора на мультиплеер..." rows="3"></textarea>
+      </div>
+      <div class="error-box" id="error2"></div>
+      <div style="display:flex;gap:10px;flex-direction:column;">
+        <button class="btn" onclick="handleRegen()" id="regenBtn">🔄 Перегенерировать</button>
+        <button class="btn btn-secondary" onclick="applyEdit()">✅ Применить правки</button>
       </div>
     </div>
   </div>
 
-  <!-- Шаг 3: Публикация -->
-  <div id="step3" style="display:none">
-    <div class="card">
-      <div class="card-label">Шаг 3 — Публикация</div>
-      <div style="font-size:14px;color:#64748b;margin-bottom:12px">Как тебя зовут? (или оставь анонимом)</div>
-      <input type="text" id="author-input" placeholder="Аноним" maxlength="30">
+  <!-- Step 3: Publish -->
+  <div class="step" id="step3">
+    <div class="step-title">Шаг 3 — Публикация</div>
+
+    <div class="field">
+      <label>Название игры</label>
+      <input type="text" id="titleInput" placeholder="Название вашего GDD">
     </div>
-    <button class="btn btn-primary" id="btn-publish" onclick="publishDraft()">🚀 Опубликовать в ленту</button>
-    <button class="btn btn-ghost" style="margin-top:10px" onclick="cancelPublish()">← Назад к драфту</button>
+
+    <div class="field">
+      <label>Жанр</label>
+      <input type="text" id="genreInput" placeholder="RPG, Action, Strategy...">
+    </div>
+
+    <div class="field">
+      <label>Ваше имя (или псевдоним)</label>
+      <input type="text" id="authorInput" placeholder="Как вас называть?">
+    </div>
+
+    <div class="error-box" id="error3"></div>
+
+    <button class="btn" id="publishBtn" onclick="handlePublish()">🚀 Опубликовать в ленту</button>
   </div>
 </div>
-
-<div class="toast" id="toast"></div>
 
 <script>
-// ── Config ────────────────────────────────────────────────────────────────────
-const RAW_URL = 'https://raw.githubusercontent.com/DotochkaPi/game-draft-feed/main/data.json';
-const GITHUB_TOKEN = ['ghp_2M70F0WOQ', 'p9FF3kCKuICtW4eqVEHeQ4Ui2HW'].join('');
-const REPO = 'DotochkaPi/game-draft-feed';
-const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const SUPABASE_URL = 'https://vfyqrsxcenksspvklhak.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmeXFyc3hjZW5rc3NwdmtsaGFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzIwMTQsImV4cCI6MjA4OTQ0ODAxNH0.4oTHiuHexv3rwcj_blkDTcALBXzadug38mtWga7yi-4';
+const HEADERS = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation'
+};
 
-// ── Key from URL ──────────────────────────────────────────────────────────────
-const _urlKey = new URLSearchParams(window.location.search).get('key');
-if (_urlKey) localStorage.setItem('groq_key', _urlKey);
+const SYSTEM_PROMPT = `Ты — опытный геймдизайнер и Concept Designer. Создавай Game Design Document (GDD) на русском языке.
 
-// ── State ─────────────────────────────────────────────────────────────────────
-let currentGDD = '';
-let editMode = false;
+Структура GDD с эмодзи-заголовками:
+🎮 Концепция — краткое описание игры (2-3 предложения)
+🌍 Сеттинг — мир, атмосфера, время действия
+🎯 Геймплей — основные механики, управление, цели
+🗺️ Прогрессия — развитие игрока, уровни, система прогресса
+⚡ Уникальные механики — что делает игру особенной (2-4 пункта)
+🏆 Победа / Конец — условия победы или завершения
+💡 Аудитория — для кого эта игра
 
-// ── Utils ─────────────────────────────────────────────────────────────────────
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+Используй • для пунктов внутри разделов.
+Пиши ёмко и конкретно. Без лишней воды. Объём — 300-500 слов.`;
+
+let generatedContent = '';
+let currentStep = 1;
+
+// Init: check for groq key
+(function init() {
+  const params = new URLSearchParams(location.search);
+  const urlKey = params.get('key');
+  if (urlKey && urlKey.startsWith('gsk_')) {
+    localStorage.setItem('groq_key', urlKey);
+  }
+  const key = localStorage.getItem('groq_key');
+  if (key) {
+    document.getElementById('keyHint').style.display = 'none';
+  }
+  const keyInput = document.getElementById('keyInput');
+  if (keyInput && key) keyInput.value = key;
+})();
+
+function saveKey(val) {
+  const v = val.trim();
+  if (v.startsWith('gsk_')) {
+    localStorage.setItem('groq_key', v);
+    document.getElementById('keyHint').style.display = 'none';
+  }
+}
+
+function getGroqKey() {
+  return localStorage.getItem('groq_key') || '';
 }
 
 function setStep(n) {
-  ['step1','step2','step3'].forEach((id,i) => {
-    document.getElementById(id).style.display = i+1 === n ? '' : 'none';
-  });
-  ['dot1','dot2','dot3'].forEach((id,i) => {
-    const d = document.getElementById(id);
-    d.className = 'step-dot' + (i+1 < n ? ' done' : i+1 === n ? ' active' : '');
-  });
-  ['line1','line2'].forEach((id,i) => {
-    document.getElementById(id).className = 'step-line' + (i+1 < n ? ' done' : '');
-  });
-}
-
-function genUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = Math.random()*16|0;
-    return (c==='x' ? r : (r&0x3|0x8)).toString(16);
-  });
-}
-
-// ── Groq ──────────────────────────────────────────────────────────────────────
-async function groqCall(system, user) {
-  let key = localStorage.getItem('groq_key') || '';
-  if (!key) {
-    const entered = prompt('Введи Groq API ключ (бесплатно: console.groq.com → API Keys):');
-    if (entered && entered.trim().startsWith('gsk_')) {
-      localStorage.setItem('groq_key', entered.trim());
-      key = entered.trim();
-    } else throw new Error('Ключ не введён');
+  for (let i = 1; i <= 3; i++) {
+    document.getElementById('step' + i).classList.toggle('active', i === n);
+    const dot = document.getElementById('dot' + i);
+    dot.classList.toggle('active', i === n);
+    dot.classList.toggle('done', i < n);
+    if (i < 3) {
+      document.getElementById('line' + i).classList.toggle('done', i < n);
+    }
   }
+  currentStep = n;
+}
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function hideError(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderContent(text) {
+  if (!text) return '';
+  const lines = text.split('\n');
+  let html = '';
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) { html += '<br>'; continue; }
+    const emojiRe = /^[\u{1F000}-\u{1FFFF}\u{2600}-\u{27FF}\u{2300}-\u{23FF}⚡🎮🗺️🎯🏆💡🌍🔧⚙️🎲🏅🌟✨🎪🎨🎭🎬🎤🎧🎵🎶🎸🎹🎺🎻🥁📖📝📜📚🗒️📋📌📍🔑🗝️💎🏰🗡️🛡️🚀🌙⭐🌈🔮🎁🎊🎉🎀🎗️]/u;
+    if (emojiRe.test(trimmed)) {
+      html += `<span class="section-header">${escapeHtml(trimmed)}</span>`;
+    } else if (trimmed.startsWith('•') || trimmed.startsWith('-') || trimmed.startsWith('*')) {
+      const lineText = trimmed.replace(/^[•\-\*]\s*/, '');
+      html += `<span class="bullet">${escapeHtml(lineText)}</span>`;
+    } else {
+      html += `<span class="body-text">${escapeHtml(trimmed)}</span>`;
+    }
+  }
+  return html;
+}
+
+async function callGroq(messages) {
+  const key = getGroqKey();
+  if (!key) throw new Error('Groq API ключ не найден');
+
   const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: GROQ_MODEL, messages: [{role:'system',content:system},{role:'user',content:user}], temperature: 0.8, max_tokens: 1500 })
+    headers: {
+      'Authorization': 'Bearer ' + key,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages,
+      temperature: 0.8,
+      max_tokens: 1500
+    })
   });
-  if (!resp.ok) throw new Error('Groq ' + resp.status);
-  return (await resp.json()).choices[0].message.content;
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || 'Groq API error: ' + resp.status);
+  }
+
+  const data = await resp.json();
+  return data.choices[0].message.content;
 }
 
-// ── GDD Render ────────────────────────────────────────────────────────────────
-function renderGDD(text) {
-  const container = document.getElementById('gdd-output');
-  container.innerHTML = '';
-  text.split('\n').forEach(line => {
-    if (!line.trim()) return;
-    const el = document.createElement('div');
-    if (/^[🎯🎮👥📱💰🔧⚡]/.test(line.trim())) {
-      el.className = 'section';
-      el.textContent = line.trim();
-    } else if (/^[•\-]/.test(line.trim())) {
-      el.className = 'bullet';
-      el.textContent = line.replace(/^[•\-]\s*/,'').trim();
-    } else {
-      el.className = 'body-text';
-      el.textContent = line.trim();
-    }
-    container.appendChild(el);
-  });
-}
+async function handleGenerate() {
+  const idea = document.getElementById('ideaInput').value.trim();
+  if (!idea) { showError('error1', 'Введите идею игры'); return; }
 
-// ── Generate GDD ─────────────────────────────────────────────────────────────
-async function generateGDD() {
-  const idea = document.getElementById('idea-input').value.trim();
-  if (!idea) { showToast('Введи идею игры'); return; }
-
-  const btn = document.getElementById('btn-generate');
+  hideError('error1');
+  const btn = document.getElementById('generateBtn');
   btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div> Генерирую...';
+  btn.innerHTML = '<span class="spinner-inline"></span> Генерируем...';
 
   try {
-    const gdd = await groqCall(
-      `Ты Concept Designer в геймдизайн-агентстве. Твоя задача — взять сырую идею и превратить её в чёткий игровой концепт с проработанной механикой.
+    const content = await callGroq([
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: 'Идея игры: ' + idea }
+    ]);
 
-Напиши GDD-драфт на русском языке СТРОГО в таком формате (никаких вступлений, никакого текста вне формата):
-
-🎯 Концепт
-[2-3 предложения. Суть игры, уникальность, ощущение]
-
-🎮 Core Loop
-• [действие игрока — результат — мотивация продолжить]
-• [второй шаг]
-• [третий шаг]
-• [как усложняется]
-
-👥 Целевая аудитория
-[возраст, портрет игрока, когда и где играет]
-
-📱 Платформа и управление
-[платформа + управление]
-
-💰 Монетизация
-[конкретная модель]
-
-🔧 Ключевые механики
-• [механика 1 — название + как работает]
-• [механика 2]
-• [механика 3]
-
-⚡ USP — чем отличается от похожих игр
-[1-2 предложения, конкретно]`,
-      `Идея игры: "${idea}"`
-    );
-    currentGDD = gdd;
-    renderGDD(gdd);
+    generatedContent = content;
+    document.getElementById('draftPreview').innerHTML = renderContent(content);
+    document.getElementById('editTextarea').value = content;
+    document.getElementById('editMode').style.display = 'none';
+    document.getElementById('draftActions').style.display = 'flex';
     setStep(2);
-  } catch(e) {
-    showToast('Ошибка: ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '✨ Сгенерировать драфт';
+
+    // Try to extract title from content
+    const titleMatch = content.match(/^(?:🎮[^\n]*?\n)?([^\n\#•\-]{5,60})/m);
+    if (titleMatch) {
+      const raw = titleMatch[1].replace(/^[🎮\s]+/, '').trim();
+      if (raw.length > 3 && raw.length < 60) {
+        document.getElementById('titleInput').value = raw;
+      }
+    }
+  } catch (e) {
+    showError('error1', '❌ ' + e.message);
   }
+
+  btn.disabled = false;
+  btn.innerHTML = '✨ Сгенерировать драфт';
 }
 
-// ── Edit ──────────────────────────────────────────────────────────────────────
-function toggleEdit() {
-  document.getElementById('gdd-edit').value = currentGDD;
-  document.getElementById('edit-comment').value = '';
-  document.getElementById('edit-area').style.display = '';
-  document.getElementById('view-btns').style.display = 'none';
-  document.getElementById('edit-btns').style.display = '';
+function showEditMode() {
+  document.getElementById('editMode').style.display = 'block';
+  document.getElementById('draftActions').style.display = 'none';
+  document.getElementById('editTextarea').value = generatedContent;
 }
 
-function cancelEdit() {
-  document.getElementById('edit-area').style.display = 'none';
-  document.getElementById('view-btns').style.display = '';
-  document.getElementById('edit-btns').style.display = 'none';
+function applyEdit() {
+  generatedContent = document.getElementById('editTextarea').value;
+  document.getElementById('draftPreview').innerHTML = renderContent(generatedContent);
+  document.getElementById('editMode').style.display = 'none';
+  document.getElementById('draftActions').style.display = 'flex';
 }
 
-async function regenGDD() {
-  const edited = document.getElementById('gdd-edit').value.trim();
-  const comment = document.getElementById('edit-comment').value.trim();
-  const btn = document.querySelector('#edit-btns .btn-primary');
+async function handleRegen() {
+  const editedText = document.getElementById('editTextarea').value;
+  const comment = document.getElementById('regenComment').value.trim();
+  hideError('error2');
+
+  const btn = document.getElementById('regenBtn');
   btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div> Генерирую...';
-  try {
-    const prompt = comment
-      ? `Вот отредактированный GDD:\n${edited}\n\nКомментарий: ${comment}\n\nУлучши GDD с учётом комментария, сохрани формат.`
-      : `Вот отредактированный GDD:\n${edited}\n\nПриведи к стандартному формату, улучши формулировки.`;
-    const newGDD = await groqCall(
-      'Ты Concept Designer. Доработай GDD на русском. Сохрани формат с emoji-заголовками. Только текст GDD, без вступлений.',
-      prompt
-    );
-    currentGDD = newGDD;
-    renderGDD(newGDD);
-    cancelEdit();
-  } catch(e) {
-    showToast('Ошибка: ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '🔄 Перегенерировать';
-  }
-}
-
-function downloadGDD() {
-  if (!currentGDD) return;
-  const blob = new Blob([currentGDD], {type:'text/plain;charset=utf-8'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'game-draft.txt';
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
-// ── Publish ───────────────────────────────────────────────────────────────────
-function startPublish() { setStep(3); }
-function cancelPublish() { setStep(2); }
-
-async function publishDraft() {
-  const author = document.getElementById('author-input').value.trim() || 'Аноним';
-  const btn = document.getElementById('btn-publish');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div> Публикую...';
+  btn.innerHTML = '<span class="spinner-inline"></span> Перегенерируем...';
 
   try {
-    // Загружаем текущие данные
-    const dataResp = await fetch(RAW_URL + '?t=' + Date.now());
-    const data = dataResp.ok ? await dataResp.json() : { drafts: [] };
-    const drafts = data.drafts || [];
+    const userMsg = comment
+      ? `Предыдущий вариант:\n${editedText}\n\nКомментарий: ${comment}`
+      : `Улучши этот GDD:\n${editedText}`;
 
-    // Извлекаем заголовок и жанр
-    const lines = currentGDD.split('\n').filter(l => l.trim());
-    const conceptLine = lines.find(l => l.includes('Концепт'));
-    const titleLine = lines[lines.indexOf(conceptLine)+1] || lines[0] || '';
-    const title = titleLine.replace(/^[🎯🎮👥📱💰🔧⚡•\-]\s*/,'').substring(0,80);
+    const content = await callGroq([
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: userMsg }
+    ]);
 
-    const genreLine = lines.find(l => l.includes('Жанр') || l.includes('Целевая')) || '';
-    const genreMatch = currentGDD.match(/roguelike|runner|tower defense|puzzle|platformer|RPG|strategy|casual|simulation/i);
-    const genre = genreMatch ? genreMatch[0] : 'Другое';
+    generatedContent = content;
+    document.getElementById('editTextarea').value = content;
+    document.getElementById('draftPreview').innerHTML = renderContent(content);
+    document.getElementById('editMode').style.display = 'none';
+    document.getElementById('draftActions').style.display = 'flex';
+  } catch (e) {
+    showError('error2', '❌ ' + e.message);
+  }
 
-    const newDraft = {
-      id: genUUID(),
-      title: title || 'Без названия',
-      genre: genre,
-      content: currentGDD,
-      author: author,
-      createdAt: new Date().toISOString(),
-      likes: 0,
-      likedBy: []
-    };
+  btn.disabled = false;
+  btn.innerHTML = '🔄 Перегенерировать';
+}
 
-    drafts.unshift(newDraft);
-    const newData = JSON.stringify({ drafts }, null, 2);
+function goToStep3() {
+  setStep(3);
+}
 
-    // Получаем SHA текущего data.json
-    const shaResp = await fetch('https://api.github.com/repos/' + REPO + '/contents/data.json', {
-      headers: { 'Authorization': 'Bearer ' + GITHUB_TOKEN }
+async function handlePublish() {
+  const title = document.getElementById('titleInput').value.trim();
+  const genre = document.getElementById('genreInput').value.trim();
+  const author = document.getElementById('authorInput').value.trim();
+
+  hideError('error3');
+
+  if (!title) { showError('error3', 'Введите название игры'); return; }
+  if (!author) { showError('error3', 'Введите ваше имя'); return; }
+  if (!generatedContent) { showError('error3', 'Нет контента для публикации'); return; }
+
+  const btn = document.getElementById('publishBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-inline"></span> Публикуем...';
+
+  try {
+    const resp = await fetch(SUPABASE_URL + '/rest/v1/drafts', {
+      method: 'POST',
+      headers: HEADERS,
+      body: JSON.stringify({
+        title,
+        genre: genre || 'Без жанра',
+        content: generatedContent,
+        author,
+        likes: 0,
+        liked_by: []
+      })
     });
-    const shaData = await shaResp.json();
-    const sha = shaData.sha;
 
-    // Сохраняем
-    const putResp = await fetch('https://api.github.com/repos/' + REPO + '/contents/data.json', {
-      method: 'PUT',
-      headers: { 'Authorization': 'Bearer ' + GITHUB_TOKEN, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: 'add draft: ' + newDraft.id.substring(0,8), content: btoa(unescape(encodeURIComponent(newData))), sha: sha })
-    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.message || 'HTTP ' + resp.status);
+    }
 
-    if (!putResp.ok) throw new Error('Ошибка сохранения: ' + putResp.status);
+    const result = await resp.json();
+    const newDraft = Array.isArray(result) ? result[0] : result;
+    if (!newDraft || !newDraft.id) throw new Error('Не получили ID нового драфта');
 
-    window.location.href = 'draft.html?id=' + newDraft.id;
-  } catch(e) {
-    showToast('Ошибка: ' + e.message);
+    location.href = 'draft.html?id=' + newDraft.id;
+  } catch (e) {
+    showError('error3', '❌ ' + e.message);
     btn.disabled = false;
     btn.innerHTML = '🚀 Опубликовать в ленту';
   }
