@@ -5,254 +5,112 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🎮 Game Draft Feed</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: #0a0a0f;
-    color: #e2e8f0;
-    font-family: system-ui, -apple-system, sans-serif;
-    min-height: 100vh;
-    padding-bottom: 40px;
-  }
-  .header {
-    background: #12121a;
-    border-bottom: 1px solid #2a2a3a;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    padding: 0 16px;
-  }
-  .header-inner {
-    max-width: 600px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 56px;
-  }
-  .header h1 { font-size: 1.1rem; font-weight: 700; }
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-size: 0.875rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.15s ease;
-  }
-  .btn-primary {
-    background: #21c55d;
-    color: #000;
-  }
-  .btn-primary:hover { background: #16a34a; transform: translateY(-1px); }
-  .btn-ghost {
-    background: transparent;
-    color: #64748b;
-    border: 1px solid #2a2a3a;
-  }
-  .btn-ghost:hover { color: #e2e8f0; border-color: #4a4a5a; }
-  .container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px 16px;
-  }
-  .toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-  .count-label { color: #64748b; font-size: 0.875rem; }
-  .spinner {
-    display: flex;
-    justify-content: center;
-    padding: 48px;
-  }
-  .spin {
-    width: 36px;
-    height: 36px;
-    border: 3px solid #2a2a3a;
-    border-top-color: #21c55d;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .empty {
-    text-align: center;
-    padding: 64px 24px;
-    color: #64748b;
-  }
-  .empty .emoji { font-size: 3rem; margin-bottom: 16px; }
-  .empty p { font-size: 1rem; margin-bottom: 20px; }
-  .card {
-    background: #12121a;
-    border: 1px solid #2a2a3a;
-    border-radius: 12px;
-    padding: 18px;
-    margin-bottom: 12px;
-    transition: border-color 0.15s ease, transform 0.15s ease;
-    cursor: pointer;
-  }
-  .card:hover { border-color: #3a3a4a; transform: translateY(-2px); }
-  .card-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 10px;
-  }
-  .card-title {
-    font-size: 0.975rem;
-    font-weight: 600;
-    line-height: 1.4;
-    flex: 1;
-    color: #e2e8f0;
-  }
-  .genre-tag {
-    background: #1a1a2e;
-    color: #21c55d;
-    border: 1px solid #21c55d33;
-    border-radius: 6px;
-    padding: 3px 10px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .card-meta {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #64748b;
-    font-size: 0.8rem;
-  }
-  .card-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px solid #1e1e2e;
-  }
-  .likes {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    color: #64748b;
-    font-size: 0.875rem;
-  }
-  .read-btn {
-    color: #21c55d;
-    font-size: 0.875rem;
-    font-weight: 600;
-    text-decoration: none;
-  }
-  .read-btn:hover { text-decoration: underline; }
-  .error {
-    text-align: center;
-    padding: 40px;
-    color: #ef4444;
-    font-size: 0.9rem;
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0a0a0f; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; }
+.container { max-width: 600px; margin: 0 auto; padding: 16px; }
+header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 24px; border-bottom: 1px solid #2a2a3a; margin-bottom: 24px; }
+header h1 { font-size: 1.4rem; font-weight: 700; }
+.btn { background: #21c55d; color: #0a0a0f; border: none; border-radius: 8px; padding: 10px 18px; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: opacity 0.2s; }
+.btn:hover { opacity: 0.85; }
+.btn-ghost { background: transparent; color: #21c55d; border: 1px solid #21c55d; }
+.spinner { display: flex; justify-content: center; padding: 60px 0; }
+.spinner::after { content: ''; width: 36px; height: 36px; border: 3px solid #2a2a3a; border-top-color: #21c55d; border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty { text-align: center; padding: 60px 0; color: #64748b; }
+.empty p { margin-bottom: 20px; font-size: 1.1rem; }
+.cards { display: flex; flex-direction: column; gap: 16px; }
+.card { background: #12121a; border: 1px solid #2a2a3a; border-radius: 12px; padding: 18px; transition: border-color 0.2s; }
+.card:hover { border-color: #21c55d44; }
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.card-title { font-size: 1.05rem; font-weight: 600; line-height: 1.4; }
+.genre-tag { background: #21c55d22; color: #21c55d; border: 1px solid #21c55d44; border-radius: 6px; padding: 3px 10px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+.card-meta { display: flex; align-items: center; gap: 12px; color: #64748b; font-size: 0.8rem; flex-wrap: wrap; }
+.card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; }
+.likes { display: flex; align-items: center; gap: 6px; color: #64748b; font-size: 0.85rem; }
+.read-link { color: #21c55d; text-decoration: none; font-size: 0.9rem; font-weight: 600; }
+.read-link:hover { text-decoration: underline; }
+.toolbar { display: flex; justify-content: flex-end; margin-bottom: 16px; }
 </style>
 </head>
 <body>
-<header class="header">
-  <div class="header-inner">
-    <h1>🎮 Game Draft Feed</h1>
-    <a href="create.html" class="btn btn-primary">✨ Создать GDD</a>
-  </div>
-</header>
 <div class="container">
+  <header>
+    <h1>🎮 Game Draft Feed</h1>
+    <a href="create.html" class="btn">✨ Создать GDD</a>
+  </header>
+
   <div class="toolbar">
-    <span class="count-label" id="count-label">Загрузка...</span>
-    <button class="btn btn-ghost" onclick="loadFeed()">↻ Обновить</button>
+    <button class="btn btn-ghost" id="refreshBtn" onclick="loadDrafts()">🔄 Обновить</button>
   </div>
-  <div id="feed"></div>
+
+  <div id="content">
+    <div class="spinner"></div>
+  </div>
 </div>
 
 <script>
-const RAW_URL = 'https://raw.githubusercontent.com/DotochkaPi/game-draft-feed/main/data.json';
-async function fetchData() {
-  // Добавляем timestamp чтобы обойти кэш
-  const url = RAW_URL + '?t=' + Date.now() + '&r=' + Math.random().toString(36).slice(2);
-  const r = await fetch(url, { cache: 'no-store' });
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  return await r.json();
-}
+const SUPABASE_URL = 'https://vfyqrsxcenksspvklhak.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmeXFyc3hjZW5rc3NwdmtsaGFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzIwMTQsImV4cCI6MjA4OTQ0ODAxNH0.4oTHiuHexv3rwcj_blkDTcALBXzadug38mtWga7yi-4';
+const HEADERS = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY,
+  'Content-Type': 'application/json'
+};
 
-function timeAgo(iso) {
-  const diff = Date.now() - new Date(iso).getTime();
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
   const m = Math.floor(diff / 60000);
   if (m < 1) return 'только что';
-  if (m < 60) return m + ' мин назад';
+  if (m < 60) return m + ' мин. назад';
   const h = Math.floor(m / 60);
-  if (h < 24) return h + ' ч назад';
+  if (h < 24) return h + ' ч. назад';
   const d = Math.floor(h / 24);
-  return d + ' дн назад';
+  if (d < 30) return d + ' д. назад';
+  return new Date(dateStr).toLocaleDateString('ru-RU');
 }
 
-function renderCard(draft) {
-  const div = document.createElement('div');
-  div.className = 'card';
-  div.onclick = () => window.location.href = `draft.html?id=${draft.id}`;
-  div.innerHTML = `
-    <div class="card-top">
-      <div class="card-title">${escHtml(draft.title || 'Без названия')}</div>
-      <span class="genre-tag">${escHtml(draft.genre || 'Другое')}</span>
-    </div>
-    <div class="card-meta">
-      <span>👤 ${escHtml(draft.author || 'Аноним')}</span>
-      <span>🕐 ${timeAgo(draft.createdAt)}</span>
-    </div>
-    <div class="card-footer">
-      <span class="likes">❤️ ${draft.likes || 0}</span>
-      <a href="draft.html?id=${draft.id}" class="read-btn" onclick="event.stopPropagation()">Читать →</a>
-    </div>
-  `;
-  return div;
-}
-
-function escHtml(s) {
+function escapeHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-async function loadFeed() {
-  const feed = document.getElementById('feed');
-  const label = document.getElementById('count-label');
-  feed.innerHTML = '<div class="spinner"><div class="spin"></div></div>';
-  label.textContent = 'Загрузка...';
+async function loadDrafts() {
+  const content = document.getElementById('content');
+  content.innerHTML = '<div class="spinner"></div>';
   try {
-    const data = await fetchData();
-    const drafts = (data.drafts || []).slice().sort((a, b) => {
-      if ((b.likes || 0) !== (a.likes || 0)) return (b.likes || 0) - (a.likes || 0);
-      return new Date(b.createdAt) - new Date(a.createdAt);
-    });
-    feed.innerHTML = '';
-    if (drafts.length === 0) {
-      label.textContent = '0 драфтов';
-      feed.innerHTML = `<div class="empty"><div class="emoji">🎮</div><p>Пока нет драфтов. Будь первым!</p><a href="create.html" class="btn btn-primary">✨ Создать GDD</a></div>`;
-    } else {
-      label.textContent = drafts.length + ' ' + plural(drafts.length, 'драфт', 'драфта', 'драфтов');
-      drafts.forEach(d => feed.appendChild(renderCard(d)));
+    const resp = await fetch(SUPABASE_URL + '/rest/v1/drafts?select=*&order=likes.desc,created_at.desc', { headers: HEADERS });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const drafts = await resp.json();
+
+    if (!drafts.length) {
+      content.innerHTML = '<div class="empty"><p>Пока нет драфтов 🎮</p><a href="create.html" class="btn">✨ Создать первый</a></div>';
+      return;
     }
-  } catch(e) {
-    feed.innerHTML = `<div class="error">Ошибка загрузки: ${e.message}<br><br><button class="btn btn-ghost" onclick="loadFeed()">Повторить</button></div>`;
-    label.textContent = 'Ошибка';
+
+    const cards = drafts.map(d => `
+      <div class="card">
+        <div class="card-top">
+          <div class="card-title">${escapeHtml(d.title)}</div>
+          <div class="genre-tag">${escapeHtml(d.genre || 'Без жанра')}</div>
+        </div>
+        <div class="card-meta">
+          <span>👤 ${escapeHtml(d.author || 'Аноним')}</span>
+          <span>🕐 ${timeAgo(d.created_at)}</span>
+        </div>
+        <div class="card-footer">
+          <div class="likes">❤️ ${d.likes || 0}</div>
+          <a href="draft.html?id=${escapeHtml(d.id)}" class="read-link">Читать →</a>
+        </div>
+      </div>
+    `).join('');
+
+    content.innerHTML = '<div class="cards">' + cards + '</div>';
+  } catch (e) {
+    content.innerHTML = '<div class="empty"><p>Ошибка загрузки 😢</p><button class="btn" onclick="loadDrafts()">Повторить</button></div>';
+    console.error(e);
   }
 }
 
-function plural(n, one, few, many) {
-  const mod10 = n % 10, mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return one;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return few;
-  return many;
-}
-
-loadFeed();
+loadDrafts();
 </script>
 </body>
 </html>
