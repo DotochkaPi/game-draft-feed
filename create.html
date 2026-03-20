@@ -17,6 +17,7 @@ h1 { font-size: 1.3rem; font-weight: 700; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-ghost { background: transparent; color: #21c55d; border: 1px solid #21c55d; }
 .btn-secondary { background: #1e293b; color: #e2e8f0; border: 1px solid #2a2a3a; }
+.btn-danger { background: #ff6b6b22; color: #ff6b6b; border: 1px solid #ff6b6b44; }
 textarea { width: 100%; background: #12121a; border: 1px solid #2a2a3a; border-radius: 8px; color: #e2e8f0; font-family: inherit; font-size: 0.95rem; padding: 14px; resize: vertical; min-height: 120px; outline: none; transition: border-color 0.2s; }
 textarea:focus { border-color: #21c55d; }
 input[type="text"] { width: 100%; background: #12121a; border: 1px solid #2a2a3a; border-radius: 8px; color: #e2e8f0; font-family: inherit; font-size: 0.95rem; padding: 12px 14px; outline: none; transition: border-color 0.2s; }
@@ -114,7 +115,9 @@ label { display: block; color: #64748b; font-size: 0.85rem; margin-bottom: 8px; 
       <input type="text" id="authorInput" placeholder="Как вас называть?">
     </div>
     <div class="error-box" id="error3"></div>
-    <button class="btn" id="publishBtn" onclick="handlePublish()">🚀 Опубликовать в ленту</button>
+    <div id="publishActions">
+      <button class="btn" id="publishBtn" onclick="handlePublish()">🚀 Опубликовать в ленту</button>
+    </div>
   </div>
 </div>
 
@@ -231,10 +234,10 @@ async function handleGenerate() {
     document.getElementById('draftActions').style.display = 'flex';
     setStep(2);
   } catch (e) {
-    showError('error1', '\u274C ' + e.message);
+    showError('error1', '❌ ' + e.message);
   }
   btn.disabled = false;
-  btn.innerHTML = '\u2728 Сгенерировать GDD';
+  btn.innerHTML = '✨ Сгенерировать GDD';
 }
 
 function showEditMode() {
@@ -271,13 +274,18 @@ async function handleRegen() {
     document.getElementById('editMode').style.display = 'none';
     document.getElementById('draftActions').style.display = 'flex';
   } catch (e) {
-    showError('error2', '\u274C ' + e.message);
+    showError('error2', '❌ ' + e.message);
   }
   btn.disabled = false;
-  btn.innerHTML = '\uD83D\uDD04 Регенерировать';
+  btn.innerHTML = '🔄 Регенерировать';
 }
 
-function goToStep3() { setStep(3); }
+function goToStep3() {
+  // Восстанавливаем кнопку публикации если была заблокирована
+  document.getElementById('publishActions').innerHTML = '<button class="btn" id="publishBtn" onclick="handlePublish()">🚀 Опубликовать в ленту</button>';
+  hideError('error3');
+  setStep(3);
+}
 
 async function handlePublish() {
   const title = document.getElementById('titleInput').value.trim();
@@ -294,7 +302,7 @@ async function handlePublish() {
   btn.innerHTML = '<span class="spinner-inline"></span> Проверяем...';
 
   try {
-    // Собираем ВЕСЬ финальный контент одним запросом
+    // Собираем ВЕСЬ финальный контент и проверяем одним запросом
     const fullContent = 'Имя автора: ' + author + '\nНазвание игры: ' + title + '\nЖанр: ' + (genre || 'не указан') + '\n\nТекст GDD:\n' + generatedContent;
 
     const verdict = await callGroq([
@@ -303,9 +311,10 @@ async function handlePublish() {
     ], 10);
 
     if (!verdict.trim().toUpperCase().startsWith('OK')) {
-      showError('error3', '\u274C Контент не прошёл модерацию. Проверьте имя, название и текст GDD.');
-      btn.disabled = false;
-      btn.innerHTML = '\uD83D\uDE80 Опубликовать в ленту';
+      // Контент заблокирован — убираем кнопку публикации, показываем "Новый драфт"
+      showError('error3', '🚫 Контент содержит запрещённые материалы и не может быть опубликован.');
+      document.getElementById('publishActions').innerHTML =
+        '<button class="btn btn-ghost" onclick="startOver()">✏️ Создать новый драфт</button>';
       return;
     }
 
@@ -328,10 +337,26 @@ async function handlePublish() {
 
     location.href = 'draft.html?id=' + newDraft.id;
   } catch (e) {
-    showError('error3', '\u274C ' + e.message);
+    showError('error3', '❌ ' + e.message);
     btn.disabled = false;
-    btn.innerHTML = '\uD83D\uDE80 Опубликовать в ленту';
+    btn.innerHTML = '🚀 Опубликовать в ленту';
   }
+}
+
+function startOver() {
+  // Сброс и переход на шаг 1
+  generatedContent = '';
+  document.getElementById('ideaInput').value = '';
+  document.getElementById('titleInput').value = '';
+  document.getElementById('genreInput').value = '';
+  document.getElementById('authorInput').value = '';
+  document.getElementById('draftPreview').innerHTML = '';
+  document.getElementById('editTextarea').value = '';
+  hideError('error1');
+  hideError('error2');
+  hideError('error3');
+  document.getElementById('publishActions').innerHTML = '<button class="btn" id="publishBtn" onclick="handlePublish()">🚀 Опубликовать в ленту</button>';
+  setStep(1);
 }
 </script>
 </body>
