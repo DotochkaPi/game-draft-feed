@@ -44,8 +44,6 @@ label { display: block; color: #64748b; font-size: 0.85rem; margin-bottom: 8px; 
 .key-hint a { color: #21c55d; text-decoration: none; }
 .error-box { background: #ff6b6b11; border: 1px solid #ff6b6b44; border-radius: 8px; padding: 12px; color: #ff6b6b; font-size: 0.85rem; margin-bottom: 16px; display: none; }
 .draft-actions { display: flex; flex-direction: column; gap: 10px; }
-.genre-row { display: flex; gap: 10px; align-items: flex-start; }
-.genre-row input { flex: 1; }
 </style>
 </head>
 <body>
@@ -63,7 +61,7 @@ label { display: block; color: #64748b; font-size: 0.85rem; margin-bottom: 8px; 
     <div class="dot" id="dot3"></div>
   </div>
 
-  <!-- Step 1: Enter idea -->
+  <!-- Шаг 1: Введи идею -->
   <div class="step active" id="step1">
     <div class="step-title">Шаг 1 — Ваша идея</div>
 
@@ -82,14 +80,14 @@ label { display: block; color: #64748b; font-size: 0.85rem; margin-bottom: 8px; 
     <button class="btn" id="generateBtn" onclick="handleGenerate()">✨ Сгенерировать драфт</button>
   </div>
 
-  <!-- Step 2: Review draft -->
+  <!-- Шаг 2: Просмотр GDD -->
   <div class="step" id="step2">
     <div class="step-title">Шаг 2 — Ваш GDD</div>
 
     <div id="draftPreview" class="draft-preview"></div>
 
     <div class="draft-actions" id="draftActions">
-      <button class="btn" onclick="goToStep3()">📤 Опубликовать</button>
+      <button class="btn" onclick="goToStep3()">📄 Опубликовать</button>
       <button class="btn btn-ghost" onclick="showEditMode()">✏️ Редактировать</button>
     </div>
 
@@ -110,7 +108,7 @@ label { display: block; color: #64748b; font-size: 0.85rem; margin-bottom: 8px; 
     </div>
   </div>
 
-  <!-- Step 3: Publish -->
+  <!-- Шаг 3: Публикация -->
   <div class="step" id="step3">
     <div class="step-title">Шаг 3 — Публикация</div>
 
@@ -151,10 +149,10 @@ const SYSTEM_PROMPT = `Ты — опытный геймдизайнер и Conce
 🎮 Концепция — краткое описание игры (2-3 предложения)
 🌍 Сеттинг — мир, атмосфера, время действия
 🎯 Геймплей — основные механики, управление, цели
-🗺️ Прогрессия — развитие игрока, уровни, система прогресса
-⚡ Уникальные механики — что делает игру особенной (2-4 пункта)
-🏆 Победа / Конец — условия победы или завершения
-💡 Аудитория — для кого эта игра
+🌟 Уникальное механики — что отличает игру от других
+🔧 Прогрессия — развитие персонажа/мира/системы
+⚡ Аудитория — для кого это и завершения
+💰 Победа / Конец — условия победы или завершения
 
 Используй • для пунктов внутри разделов.
 Пиши ёмко и конкретно. Без лишней воды. Объём — 300-500 слов.`;
@@ -162,7 +160,7 @@ const SYSTEM_PROMPT = `Ты — опытный геймдизайнер и Conce
 let generatedContent = '';
 let currentStep = 1;
 
-// Init: check for groq key
+// Инициализация: проверяем сохранённый ключ
 (function init() {
   const params = new URLSearchParams(location.search);
   const urlKey = params.get('key');
@@ -222,7 +220,7 @@ function renderContent(text) {
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) { html += '<br>'; continue; }
-    const emojiRe = /^[\u{1F000}-\u{1FFFF}\u{2600}-\u{27FF}\u{2300}-\u{23FF}⚡🎮🗺️🎯🏆💡🌍🔧⚙️🎲🏅🌟✨🎪🎨🎭🎬🎤🎧🎵🎶🎸🎹🎺🎻🥁📖📝📜📚🗒️📋📌📍🔑🗝️💎🏰🗡️🛡️🚀🌙⭐🌈🔮🎁🎊🎉🎀🎗️]/u;
+    const emojiRe = /^[\u{1F000}-\u{1FFFF}\u{2600}-\u{27FF}\u{2300}-\u{23FF}❡🎮🗝️🎯🎲⚡🌟🔧💰🌍🏆🎁🎪🎨✨🎙🎤🎵🎶🎸🎹🎺🎻🥁📖📝📜📚📗📘📙📕🔑🗺🔍🔊📣🎦🗡⚔🏴‍☠️]/u;
     if (emojiRe.test(trimmed)) {
       html += `<span class="section-header">${escapeHtml(trimmed)}</span>`;
     } else if (trimmed.startsWith('•') || trimmed.startsWith('-') || trimmed.startsWith('*')) {
@@ -284,8 +282,8 @@ async function handleGenerate() {
     document.getElementById('draftActions').style.display = 'flex';
     setStep(2);
 
-    // Try to extract title from content
-    const titleMatch = content.match(/^(?:🎮[^\n]*?\n)?([^\n\#•\-]{5,60})/m);
+    // Попытка извлечь название из контента
+    const titleMatch = content.match(/^(?:🎮[^\n]*?\n)?([\w\s\-А-Яа-яёЁ]{5,60})/m);
     if (titleMatch) {
       const raw = titleMatch[1].replace(/^[🎮\s]+/, '').trim();
       if (raw.length > 3 && raw.length < 60) {
