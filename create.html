@@ -61,36 +61,27 @@ label { display: block; color: #64748b; font-size: 0.85rem; margin-bottom: 8px; 
     <div class="dot" id="dot3"></div>
   </div>
 
-  <!-- Шаг 1: Идея -->
   <div class="step active" id="step1">
     <div class="step-title">Шаг 1 — Твоя идея</div>
-
     <div class="key-hint" id="keyHint">
       🔑 Groq API ключ не введён. <a href="https://console.groq.com/keys" target="_blank">Получить ключ</a><br>
       Вставь ключ: <input type="text" id="keyInput" placeholder="gsk_..." style="margin-top:8px; font-size:0.8rem; padding:8px 10px;" oninput="saveKey(this.value)">
     </div>
-
     <div class="field">
       <label>Опиши свою игру</label>
       <textarea id="ideaInput" placeholder="Например: тактическая RPG с постапокалиптическим миром, где герой управляет группой выживших..." rows="5"></textarea>
     </div>
-
     <div class="error-box" id="error1"></div>
-
     <button class="btn" id="generateBtn" onclick="handleGenerate()">✨ Сгенерировать GDD</button>
   </div>
 
-  <!-- Шаг 2: Просмотр GDD -->
   <div class="step" id="step2">
     <div class="step-title">Шаг 2 — Твой GDD</div>
-
     <div id="draftPreview" class="draft-preview"></div>
-
     <div class="draft-actions" id="draftActions">
       <button class="btn" onclick="goToStep3()">📤 Опубликовать</button>
       <button class="btn btn-ghost" onclick="showEditMode()">✏️ Редактировать</button>
     </div>
-
     <div id="editMode" style="display:none;">
       <div class="field">
         <label>Редактировать текст GDD</label>
@@ -108,27 +99,21 @@ label { display: block; color: #64748b; font-size: 0.85rem; margin-bottom: 8px; 
     </div>
   </div>
 
-  <!-- Шаг 3: Публикация -->
   <div class="step" id="step3">
     <div class="step-title">Шаг 3 — Публикация</div>
-
     <div class="field">
       <label>Название игры</label>
       <input type="text" id="titleInput" placeholder="Название вашего GDD">
     </div>
-
     <div class="field">
       <label>Жанр</label>
       <input type="text" id="genreInput" placeholder="RPG, Action, Strategy...">
     </div>
-
     <div class="field">
       <label>Ваше имя (для подписи)</label>
       <input type="text" id="authorInput" placeholder="Как вас называть?">
     </div>
-
     <div class="error-box" id="error3"></div>
-
     <button class="btn" id="publishBtn" onclick="handlePublish()">🚀 Опубликовать в ленту</button>
   </div>
 </div>
@@ -143,27 +128,9 @@ const HEADERS = {
   'Prefer': 'return=representation'
 };
 
-const SYSTEM_PROMPT = `Ты опытный геймдизайнер и Concept Designer. Создавай Game Design Document (GDD) на русском языке.
+const SYSTEM_PROMPT = 'Ты опытный геймдизайнер и Concept Designer. Создавай Game Design Document (GDD) на русском языке.\n\nСтруктура GDD с эмодзи-заголовками:\n\uD83C\uDFAF Концепция — краткое описание игры (2-3 предложения)\n\uD83C\uDF0D Сеттинг — мир, атмосфера, время действия\n\uD83C\uDFAE Геймплей — основные механики, управление, цели\n\u2B50 Уникальная механика — чем отличается игра от других\n\uD83D\uDCC8 Прогрессия — развитие персонажа/уровней/системы\n\uD83C\uDFB5 Аудио — как игра звучит и ощущается\n\uD83C\uDFC6 Победа / Конец — условия победы для завершения\n\nИспользуй эти пункты через разделители.\nПиши ёмко и содержательно. Без лишней воды. Объём — 300-500 слов.';
 
-Структура GDD с эмодзи-заголовками:
-🎯 Концепция — краткое описание игры (2-3 предложения)
-🌍 Сеттинг — мир, атмосфера, время действия
-🎮 Геймплей — основные механики, управление, цели
-⭐ Уникальная механика — чем отличается игра от других
-📈 Прогрессия — развитие персонажа/уровней/системы
-🎵 Аудио — как игра звучит и ощущается
-🏆 Победа / Конец — условия победы для завершения
-
-Используй эти пункты через разделители.
-Пиши ёмко и содержательно. Без лишней воды. Объём — 300-500 слов.`;
-
-const MODERATION_PROMPT = `Ты модератор контента. Проверь текст на наличие:
-- нецензурной лексики (мат, оскорбления)
-- дискриминационного контента
-- пропаганды насилия или экстремизма
-- спама и бессмысленного текста
-
-Ответь ТОЛЬКО одним словом: OK (если всё в порядке) или BLOCK (если есть нарушения).`;
+const MODERATION_PROMPT = 'Ты строгий модератор контента. Тебе передают финальный материал перед публикацией: имя автора, название игры, жанр и текст GDD.\n\nПроверь ВЕСЬ текст на наличие хотя бы одного из следующего:\n- нецензурная лексика, мат, ругательства на любом языке\n- оскорбления людей или групп людей\n- гомофобия, расизм, дискриминация по любому признаку\n- пропаганда насилия, экстремизма, терроризма\n- сексуальный контент\n- спам, бессмысленный текст, троллинг\n- запрещённые слова в названии, имени или тексте\n\nОтветь ТОЛЬКО одним словом без объяснений: OK (если всё чисто) или BLOCK (если есть хоть одно нарушение).';
 
 let generatedContent = '';
 let currentStep = 1;
@@ -171,13 +138,9 @@ let currentStep = 1;
 (function init() {
   const params = new URLSearchParams(location.search);
   const urlKey = params.get('key');
-  if (urlKey && urlKey.startsWith('gsk_')) {
-    localStorage.setItem('groq_key', urlKey);
-  }
+  if (urlKey && urlKey.startsWith('gsk_')) localStorage.setItem('groq_key', urlKey);
   const key = localStorage.getItem('groq_key');
-  if (key) {
-    document.getElementById('keyHint').style.display = 'none';
-  }
+  if (key) document.getElementById('keyHint').style.display = 'none';
   const keyInput = document.getElementById('keyInput');
   if (keyInput && key) keyInput.value = key;
 })();
@@ -190,9 +153,7 @@ function saveKey(val) {
   }
 }
 
-function getGroqKey() {
-  return localStorage.getItem('groq_key') || '';
-}
+function getGroqKey() { return localStorage.getItem('groq_key') || ''; }
 
 function setStep(n) {
   for (let i = 1; i <= 3; i++) {
@@ -200,9 +161,7 @@ function setStep(n) {
     const dot = document.getElementById('dot' + i);
     dot.classList.toggle('active', i === n);
     dot.classList.toggle('done', i < n);
-    if (i < 3) {
-      document.getElementById('line' + i).classList.toggle('done', i < n);
-    }
+    if (i < 3) document.getElementById('line' + i).classList.toggle('done', i < n);
   }
   currentStep = n;
 }
@@ -212,9 +171,7 @@ function showError(id, msg) {
   el.textContent = msg;
   el.style.display = 'block';
 }
-function hideError(id) {
-  document.getElementById(id).style.display = 'none';
-}
+function hideError(id) { document.getElementById(id).style.display = 'none'; }
 
 function escapeHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -229,87 +186,55 @@ function renderContent(text) {
     if (!trimmed) { html += '<br>'; continue; }
     const emojiRe = /^\p{Emoji}/u;
     if (emojiRe.test(trimmed)) {
-      html += `<span class="section-header">${escapeHtml(trimmed)}</span>`;
-    } else if (trimmed.startsWith('•') || trimmed.startsWith('-') || trimmed.startsWith('*')) {
-      const lineText = trimmed.replace(/^[•\-\*]\s*/, '');
-      html += `<span class="bullet">${escapeHtml(lineText)}</span>`;
+      html += '<span class="section-header">' + escapeHtml(trimmed) + '</span>';
+    } else if (trimmed.startsWith('\u2022') || trimmed.startsWith('-') || trimmed.startsWith('*')) {
+      html += '<span class="bullet">' + escapeHtml(trimmed.replace(/^[\u2022\-\*]\s*/, '')) + '</span>';
     } else {
-      html += `<span class="body-text">${escapeHtml(trimmed)}</span>`;
+      html += '<span class="body-text">' + escapeHtml(trimmed) + '</span>';
     }
   }
   return html;
 }
 
-async function callGroq(messages, maxTokens = 1500) {
+async function callGroq(messages, maxTokens) {
   const key = getGroqKey();
   if (!key) throw new Error('Groq API ключ не введён');
-
   const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
-    headers: {
-      'Authorization': 'Bearer ' + key,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
-      messages,
-      temperature: 0.8,
-      max_tokens: maxTokens
-    })
+    headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages, temperature: 0.8, max_tokens: maxTokens || 1500 })
   });
-
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({}));
     throw new Error(err.error?.message || 'Groq API error: ' + resp.status);
   }
-
   const data = await resp.json();
   return data.choices[0].message.content;
-}
-
-async function moderateText(text) {
-  const result = await callGroq([
-    { role: 'system', content: MODERATION_PROMPT },
-    { role: 'user', content: text }
-  ], 10);
-  return result.trim().toUpperCase().startsWith('OK');
 }
 
 async function handleGenerate() {
   const idea = document.getElementById('ideaInput').value.trim();
   if (!idea) { showError('error1', 'Введите идею игры'); return; }
-
   hideError('error1');
   const btn = document.getElementById('generateBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner-inline"></span> Генерируем...';
-
   try {
     const content = await callGroq([
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: 'Идея игры: ' + idea }
     ]);
-
     generatedContent = content;
     document.getElementById('draftPreview').innerHTML = renderContent(content);
     document.getElementById('editTextarea').value = content;
     document.getElementById('editMode').style.display = 'none';
     document.getElementById('draftActions').style.display = 'flex';
     setStep(2);
-
-    const titleMatch = content.match(/^[^:\n]{5,60}/m);
-    if (titleMatch) {
-      const raw = titleMatch[0].replace(/^[\p{Emoji}\s]+/u, '').trim();
-      if (raw.length > 3 && raw.length < 60) {
-        document.getElementById('titleInput').value = raw;
-      }
-    }
   } catch (e) {
-    showError('error1', '❌ ' + e.message);
+    showError('error1', '\u274C ' + e.message);
   }
-
   btn.disabled = false;
-  btn.innerHTML = '✨ Сгенерировать GDD';
+  btn.innerHTML = '\u2728 Сгенерировать GDD';
 }
 
 function showEditMode() {
@@ -329,37 +254,30 @@ async function handleRegen() {
   const editedText = document.getElementById('editTextarea').value;
   const comment = document.getElementById('regenComment').value.trim();
   hideError('error2');
-
   const btn = document.getElementById('regenBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner-inline"></span> Регенерируем...';
-
   try {
     const userMsg = comment
-      ? `Предыдущий вариант:\n${editedText}\n\nКомментарий: ${comment}`
-      : `Улучши этот GDD:\n${editedText}`;
-
+      ? 'Предыдущий вариант:\n' + editedText + '\n\nКомментарий: ' + comment
+      : 'Улучши этот GDD:\n' + editedText;
     const content = await callGroq([
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: userMsg }
     ]);
-
     generatedContent = content;
     document.getElementById('editTextarea').value = content;
     document.getElementById('draftPreview').innerHTML = renderContent(content);
     document.getElementById('editMode').style.display = 'none';
     document.getElementById('draftActions').style.display = 'flex';
   } catch (e) {
-    showError('error2', '❌ ' + e.message);
+    showError('error2', '\u274C ' + e.message);
   }
-
   btn.disabled = false;
-  btn.innerHTML = '🔄 Регенерировать';
+  btn.innerHTML = '\uD83D\uDD04 Регенерировать';
 }
 
-function goToStep3() {
-  setStep(3);
-}
+function goToStep3() { setStep(3); }
 
 async function handlePublish() {
   const title = document.getElementById('titleInput').value.trim();
@@ -367,7 +285,6 @@ async function handlePublish() {
   const author = document.getElementById('authorInput').value.trim();
 
   hideError('error3');
-
   if (!title) { showError('error3', 'Введите название игры'); return; }
   if (!author) { showError('error3', 'Введите ваше имя'); return; }
   if (!generatedContent) { showError('error3', 'Нет контента для публикации'); return; }
@@ -377,21 +294,18 @@ async function handlePublish() {
   btn.innerHTML = '<span class="spinner-inline"></span> Проверяем...';
 
   try {
-    // Модерация имени
-    const authorOk = await moderateText(author);
-    if (!authorOk) {
-      showError('error3', '❌ Имя содержит недопустимый контент');
-      btn.disabled = false;
-      btn.innerHTML = '🚀 Опубликовать в ленту';
-      return;
-    }
+    // Собираем ВЕСЬ финальный контент одним запросом
+    const fullContent = 'Имя автора: ' + author + '\nНазвание игры: ' + title + '\nЖанр: ' + (genre || 'не указан') + '\n\nТекст GDD:\n' + generatedContent;
 
-    // Модерация контента
-    const contentOk = await moderateText(generatedContent);
-    if (!contentOk) {
-      showError('error3', '❌ Контент не прошёл модерацию');
+    const verdict = await callGroq([
+      { role: 'system', content: MODERATION_PROMPT },
+      { role: 'user', content: fullContent }
+    ], 10);
+
+    if (!verdict.trim().toUpperCase().startsWith('OK')) {
+      showError('error3', '\u274C Контент не прошёл модерацию. Проверьте имя, название и текст GDD.');
       btn.disabled = false;
-      btn.innerHTML = '🚀 Опубликовать в ленту';
+      btn.innerHTML = '\uD83D\uDE80 Опубликовать в ленту';
       return;
     }
 
@@ -400,14 +314,7 @@ async function handlePublish() {
     const resp = await fetch(SUPABASE_URL + '/rest/v1/drafts', {
       method: 'POST',
       headers: HEADERS,
-      body: JSON.stringify({
-        title,
-        genre: genre || 'Без жанра',
-        content: generatedContent,
-        author,
-        likes: 0,
-        liked_by: []
-      })
+      body: JSON.stringify({ title, genre: genre || 'Без жанра', content: generatedContent, author, likes: 0, liked_by: [] })
     });
 
     if (!resp.ok) {
@@ -421,9 +328,9 @@ async function handlePublish() {
 
     location.href = 'draft.html?id=' + newDraft.id;
   } catch (e) {
-    showError('error3', '❌ ' + e.message);
+    showError('error3', '\u274C ' + e.message);
     btn.disabled = false;
-    btn.innerHTML = '🚀 Опубликовать в ленту';
+    btn.innerHTML = '\uD83D\uDE80 Опубликовать в ленту';
   }
 }
 </script>
