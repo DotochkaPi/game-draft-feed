@@ -266,6 +266,7 @@ function showBlocked() {
 async function handleGenerate() {
   const idea = document.getElementById('ideaInput').value.trim();
   if (!idea) { showError('error1', 'Введите идею игры'); return; }
+  if (idea.length < 15) { showError('error1', 'Опишите идею подробнее — минимум 15 символов'); return; }
   hideError('error1');
   const btn = document.getElementById('generateBtn');
   btn.disabled = true;
@@ -276,6 +277,15 @@ async function handleGenerate() {
       { role: 'user', content: 'Идея игры: ' + idea }
     ]);
 
+    // Проверяем что это реальный GDD, а не отказ модели
+    const gddMarkers = ['\uD83C\uDFAF', '\uD83C\uDF0D', '\uD83C\uDFAE'];
+    const hasGdd = gddMarkers.some(m => content.includes(m));
+    if (!hasGdd) {
+      showError('error1', '\u274C Опишите идею подробнее — не удалось создать GDD');
+      btn.disabled = false;
+      btn.innerHTML = '\u2728 Сгенерировать GDD';
+      return;
+    }
     btn.innerHTML = '<span class="spinner-inline"></span> Проверяем...';
     const ok = await moderateContent(content);
 
@@ -322,6 +332,15 @@ async function handleRegen() {
       { role: 'user', content: userMsg }
     ]);
 
+    // Проверяем что это реальный GDD, а не отказ модели
+    const gddMarkers = ['\uD83C\uDFAF', '\uD83C\uDF0D', '\uD83C\uDFAE'];
+    const hasGdd = gddMarkers.some(m => content.includes(m));
+    if (!hasGdd) {
+      showError('error1', '\u274C Опишите идею подробнее — не удалось создать GDD');
+      btn.disabled = false;
+      btn.innerHTML = '\u2728 Сгенерировать GDD';
+      return;
+    }
     btn.innerHTML = '<span class="spinner-inline"></span> Проверяем...';
     const ok = await moderateContent(content);
 
