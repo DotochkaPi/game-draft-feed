@@ -17,7 +17,6 @@ h1 { font-size: 1.3rem; font-weight: 700; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-ghost { background: transparent; color: #21c55d; border: 1px solid #21c55d; }
 .btn-secondary { background: #1e293b; color: #e2e8f0; border: 1px solid #2a2a3a; }
-.btn-danger { background: #ff6b6b22; color: #ff6b6b; border: 1px solid #ff6b6b44; }
 textarea { width: 100%; background: #12121a; border: 1px solid #2a2a3a; border-radius: 8px; color: #e2e8f0; font-family: inherit; font-size: 0.95rem; padding: 14px; resize: vertical; min-height: 120px; outline: none; transition: border-color 0.2s; }
 textarea:focus { border-color: #21c55d; }
 input[type="text"] { width: 100%; background: #12121a; border: 1px solid #2a2a3a; border-radius: 8px; color: #e2e8f0; font-family: inherit; font-size: 0.95rem; padding: 12px 14px; outline: none; transition: border-color 0.2s; }
@@ -44,6 +43,8 @@ label { display: block; color: #64748b; font-size: 0.85rem; margin-bottom: 8px; 
 .key-hint { background: #12121a; border: 1px solid #2a2a3a; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 0.8rem; color: #64748b; }
 .key-hint a { color: #21c55d; text-decoration: none; }
 .error-box { background: #ff6b6b11; border: 1px solid #ff6b6b44; border-radius: 8px; padding: 12px; color: #ff6b6b; font-size: 0.85rem; margin-bottom: 16px; display: none; }
+.blocked-box { background: #ff6b6b11; border: 1px solid #ff6b6b44; border-radius: 12px; padding: 20px; margin-bottom: 16px; text-align: center; }
+.blocked-box p { color: #ff6b6b; font-size: 1rem; font-weight: 600; margin-bottom: 16px; }
 .draft-actions { display: flex; flex-direction: column; gap: 10px; }
 </style>
 </head>
@@ -62,6 +63,7 @@ label { display: block; color: #64748b; font-size: 0.85rem; margin-bottom: 8px; 
     <div class="dot" id="dot3"></div>
   </div>
 
+  <!-- Шаг 1: Идея -->
   <div class="step active" id="step1">
     <div class="step-title">Шаг 1 — Твоя идея</div>
     <div class="key-hint" id="keyHint">
@@ -76,30 +78,44 @@ label { display: block; color: #64748b; font-size: 0.85rem; margin-bottom: 8px; 
     <button class="btn" id="generateBtn" onclick="handleGenerate()">✨ Сгенерировать GDD</button>
   </div>
 
+  <!-- Шаг 2: Просмотр GDD -->
   <div class="step" id="step2">
     <div class="step-title">Шаг 2 — Твой GDD</div>
-    <div id="draftPreview" class="draft-preview"></div>
-    <div class="draft-actions" id="draftActions">
-      <button class="btn" onclick="goToStep3()">📤 Опубликовать</button>
-      <button class="btn btn-ghost" onclick="showEditMode()">✏️ Редактировать</button>
+
+    <!-- Нормальный контент -->
+    <div id="step2ok">
+      <div id="draftPreview" class="draft-preview"></div>
+      <div class="draft-actions" id="draftActions">
+        <button class="btn" onclick="goToStep3()">📤 Опубликовать</button>
+        <button class="btn btn-ghost" onclick="showEditMode()">✏️ Редактировать</button>
+      </div>
+      <div id="editMode" style="display:none;">
+        <div class="field">
+          <label>Редактировать текст GDD</label>
+          <textarea id="editTextarea" rows="12" style="min-height:200px;"></textarea>
+        </div>
+        <div class="field">
+          <label>Комментарий для регенерации (необязательно)</label>
+          <textarea id="regenComment" placeholder="Что изменить? Например: сделать больше упора на кооператив..." rows="3"></textarea>
+        </div>
+        <div class="error-box" id="error2"></div>
+        <div style="display:flex;gap:10px;flex-direction:column;">
+          <button class="btn" onclick="handleRegen()" id="regenBtn">🔄 Регенерировать</button>
+          <button class="btn btn-secondary" onclick="applyEdit()">✅ Применить правки</button>
+        </div>
+      </div>
     </div>
-    <div id="editMode" style="display:none;">
-      <div class="field">
-        <label>Редактировать текст GDD</label>
-        <textarea id="editTextarea" rows="12" style="min-height:200px;"></textarea>
-      </div>
-      <div class="field">
-        <label>Комментарий для регенерации (необязательно)</label>
-        <textarea id="regenComment" placeholder="Что изменить? Например: сделать больше упора на кооператив..." rows="3"></textarea>
-      </div>
-      <div class="error-box" id="error2"></div>
-      <div style="display:flex;gap:10px;flex-direction:column;">
-        <button class="btn" onclick="handleRegen()" id="regenBtn">🔄 Регенерировать</button>
-        <button class="btn btn-secondary" onclick="applyEdit()">✅ Применить правки</button>
+
+    <!-- Заблокированный контент -->
+    <div id="step2blocked" style="display:none;">
+      <div class="blocked-box">
+        <p>🚫 Запрос неприемлемый.</p>
+        <button class="btn btn-ghost" onclick="startOver()">✏️ Создать новый драфт</button>
       </div>
     </div>
   </div>
 
+  <!-- Шаг 3: Публикация -->
   <div class="step" id="step3">
     <div class="step-title">Шаг 3 — Публикация</div>
     <div class="field">
@@ -115,9 +131,7 @@ label { display: block; color: #64748b; font-size: 0.85rem; margin-bottom: 8px; 
       <input type="text" id="authorInput" placeholder="Как вас называть?">
     </div>
     <div class="error-box" id="error3"></div>
-    <div id="publishActions">
-      <button class="btn" id="publishBtn" onclick="handlePublish()">🚀 Опубликовать в ленту</button>
-    </div>
+    <button class="btn" id="publishBtn" onclick="handlePublish()">🚀 Опубликовать в ленту</button>
   </div>
 </div>
 
@@ -131,12 +145,15 @@ const HEADERS = {
   'Prefer': 'return=representation'
 };
 
-const SYSTEM_PROMPT = 'Ты опытный геймдизайнер и Concept Designer. Создавай Game Design Document (GDD) на русском языке.\n\nСтруктура GDD с эмодзи-заголовками:\n\uD83C\uDFAF Концепция — краткое описание игры (2-3 предложения)\n\uD83C\uDF0D Сеттинг — мир, атмосфера, время действия\n\uD83C\uDFAE Геймплей — основные механики, управление, цели\n\u2B50 Уникальная механика — чем отличается игра от других\n\uD83D\uDCC8 Прогрессия — развитие персонажа/уровней/системы\n\uD83C\uDFB5 Аудио — как игра звучит и ощущается\n\uD83C\uDFC6 Победа / Конец — условия победы для завершения\n\nИспользуй эти пункты через разделители.\nПиши ёмко и содержательно. Без лишней воды. Объём — 300-500 слов.';
+const SYSTEM_PROMPT = 'Ты опытный геймдизайнер и Concept Designer. Создавай Game Design Document (GDD) на русском языке.\n\nСтруктура GDD с эмодзи-заголовками:\n\uD83C\uDFAF Концепция — краткое описание игры (2-3 предложения)\n\uD83C\uDF0D Сеттинг — мир, атмосфера, время действия\n\uD83C\uDFAE Геймплей — основные механики, управление, цели\n\u2B50 Уникальная механика — чем отличается игра от других\n\uD83D\uDCC8 Прогрессия — развитие персонажа/уровней/системы\n\uD83C\uDFB5 Аудио — как игра звучит и ощущается\n\uD83C\uDFC6 Победа / Конец — условия победы для завершения\n\nПиши ёмко и содержательно. Без лишней воды. Объём — 300-500 слов.';
 
-const MODERATION_PROMPT = 'Ты строгий модератор контента. Тебе передают финальный материал перед публикацией: имя автора, название игры, жанр и текст GDD.\n\nПроверь ВЕСЬ текст на наличие хотя бы одного из следующего:\n- нецензурная лексика, мат, ругательства на любом языке\n- оскорбления людей или групп людей\n- гомофобия, расизм, дискриминация по любому признаку\n- пропаганда насилия, экстремизма, терроризма\n- сексуальный контент\n- спам, бессмысленный текст, троллинг\n- запрещённые слова в названии, имени или тексте\n\nОтветь ТОЛЬКО одним словом без объяснений: OK (если всё чисто) или BLOCK (если есть хоть одно нарушение).';
+// Модерация GDD — проверяем сгенерированный текст
+const MODERATION_CONTENT_PROMPT = 'Ты строгий модератор контента. Проверь текст GDD на наличие хотя бы одного из следующего:\n- нецензурная лексика, мат, ругательства на любом языке\n- оскорбления людей или групп людей\n- гомофобия, расизм, дискриминация по любому признаку\n- пропаганда насилия, экстремизма, терроризма\n- сексуальный или порнографический контент\n- спам или бессмысленный текст\n\nОтветь ТОЛЬКО одним словом: OK или BLOCK.';
+
+// Модерация полей — проверяем название и имя
+const MODERATION_FIELDS_PROMPT = 'Ты строгий модератор контента. Проверь предоставленный текст (название игры или имя автора) на наличие нецензурной лексики, оскорблений, дискриминации, мата или любого запрещённого контента.\n\nОтветь ТОЛЬКО одним словом: OK или BLOCK.';
 
 let generatedContent = '';
-let currentStep = 1;
 
 (function init() {
   const params = new URLSearchParams(location.search);
@@ -166,7 +183,6 @@ function setStep(n) {
     dot.classList.toggle('done', i < n);
     if (i < 3) document.getElementById('line' + i).classList.toggle('done', i < n);
   }
-  currentStep = n;
 }
 
 function showError(id, msg) {
@@ -215,6 +231,38 @@ async function callGroq(messages, maxTokens) {
   return data.choices[0].message.content;
 }
 
+async function moderateContent(text) {
+  const verdict = await callGroq([
+    { role: 'system', content: MODERATION_CONTENT_PROMPT },
+    { role: 'user', content: text }
+  ], 10);
+  return verdict.trim().toUpperCase().startsWith('OK');
+}
+
+async function moderateField(text) {
+  const verdict = await callGroq([
+    { role: 'system', content: MODERATION_FIELDS_PROMPT },
+    { role: 'user', content: text }
+  ], 10);
+  return verdict.trim().toUpperCase().startsWith('OK');
+}
+
+function showGdd(content) {
+  // Показываем нормальный GDD, скрываем блок-экран
+  document.getElementById('step2ok').style.display = 'block';
+  document.getElementById('step2blocked').style.display = 'none';
+  document.getElementById('draftPreview').innerHTML = renderContent(content);
+  document.getElementById('editTextarea').value = content;
+  document.getElementById('editMode').style.display = 'none';
+  document.getElementById('draftActions').style.display = 'flex';
+}
+
+function showBlocked() {
+  // Показываем экран блокировки, скрываем GDD
+  document.getElementById('step2ok').style.display = 'none';
+  document.getElementById('step2blocked').style.display = 'block';
+}
+
 async function handleGenerate() {
   const idea = document.getElementById('ideaInput').value.trim();
   if (!idea) { showError('error1', 'Введите идею игры'); return; }
@@ -227,12 +275,17 @@ async function handleGenerate() {
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: 'Идея игры: ' + idea }
     ]);
-    generatedContent = content;
-    document.getElementById('draftPreview').innerHTML = renderContent(content);
-    document.getElementById('editTextarea').value = content;
-    document.getElementById('editMode').style.display = 'none';
-    document.getElementById('draftActions').style.display = 'flex';
+
+    btn.innerHTML = '<span class="spinner-inline"></span> Проверяем...';
+    const ok = await moderateContent(content);
+
     setStep(2);
+    if (!ok) {
+      showBlocked();
+    } else {
+      generatedContent = content;
+      showGdd(content);
+    }
   } catch (e) {
     showError('error1', '❌ ' + e.message);
   }
@@ -268,11 +321,16 @@ async function handleRegen() {
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: userMsg }
     ]);
-    generatedContent = content;
-    document.getElementById('editTextarea').value = content;
-    document.getElementById('draftPreview').innerHTML = renderContent(content);
-    document.getElementById('editMode').style.display = 'none';
-    document.getElementById('draftActions').style.display = 'flex';
+
+    btn.innerHTML = '<span class="spinner-inline"></span> Проверяем...';
+    const ok = await moderateContent(content);
+
+    if (!ok) {
+      showBlocked();
+    } else {
+      generatedContent = content;
+      showGdd(content);
+    }
   } catch (e) {
     showError('error2', '❌ ' + e.message);
   }
@@ -281,8 +339,6 @@ async function handleRegen() {
 }
 
 function goToStep3() {
-  // Восстанавливаем кнопку публикации если была заблокирована
-  document.getElementById('publishActions').innerHTML = '<button class="btn" id="publishBtn" onclick="handlePublish()">🚀 Опубликовать в ленту</button>';
   hideError('error3');
   setStep(3);
 }
@@ -295,26 +351,27 @@ async function handlePublish() {
   hideError('error3');
   if (!title) { showError('error3', 'Введите название игры'); return; }
   if (!author) { showError('error3', 'Введите ваше имя'); return; }
-  if (!generatedContent) { showError('error3', 'Нет контента для публикации'); return; }
 
   const btn = document.getElementById('publishBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner-inline"></span> Проверяем...';
 
   try {
-    // Собираем ВЕСЬ финальный контент и проверяем одним запросом
-    const fullContent = 'Имя автора: ' + author + '\nНазвание игры: ' + title + '\nЖанр: ' + (genre || 'не указан') + '\n\nТекст GDD:\n' + generatedContent;
+    // Проверяем название
+    const titleOk = await moderateField(title);
+    if (!titleOk) {
+      showError('error3', '🚫 Недопустимое название игры. Измените и попробуйте снова.');
+      btn.disabled = false;
+      btn.innerHTML = '🚀 Опубликовать в ленту';
+      return;
+    }
 
-    const verdict = await callGroq([
-      { role: 'system', content: MODERATION_PROMPT },
-      { role: 'user', content: fullContent }
-    ], 10);
-
-    if (!verdict.trim().toUpperCase().startsWith('OK')) {
-      // Контент заблокирован — убираем кнопку публикации, показываем "Новый драфт"
-      showError('error3', '🚫 Контент содержит запрещённые материалы и не может быть опубликован.');
-      document.getElementById('publishActions').innerHTML =
-        '<button class="btn btn-ghost" onclick="startOver()">✏️ Создать новый драфт</button>';
+    // Проверяем имя
+    const authorOk = await moderateField(author);
+    if (!authorOk) {
+      showError('error3', '🚫 Недопустимое имя. Измените и попробуйте снова.');
+      btn.disabled = false;
+      btn.innerHTML = '🚀 Опубликовать в ленту';
       return;
     }
 
@@ -344,7 +401,6 @@ async function handlePublish() {
 }
 
 function startOver() {
-  // Сброс и переход на шаг 1
   generatedContent = '';
   document.getElementById('ideaInput').value = '';
   document.getElementById('titleInput').value = '';
@@ -355,7 +411,8 @@ function startOver() {
   hideError('error1');
   hideError('error2');
   hideError('error3');
-  document.getElementById('publishActions').innerHTML = '<button class="btn" id="publishBtn" onclick="handlePublish()">🚀 Опубликовать в ленту</button>';
+  document.getElementById('step2ok').style.display = 'block';
+  document.getElementById('step2blocked').style.display = 'none';
   setStep(1);
 }
 </script>
